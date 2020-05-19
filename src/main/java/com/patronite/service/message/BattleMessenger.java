@@ -23,12 +23,18 @@ public class BattleMessenger extends AbstractMessenger {
     //TODO break battleMessage up into smaller message tyes as an alternative to this
     public void publishBattleMessagesForCurrentRound(BattleDto battle) {
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(
-                () -> battle.getLog().stream()
-                .filter(logEntry -> !logEntry.isDelivered())
-                        .findFirst()
-                        .ifPresent(undeliveredEntry -> {
-                            undeliveredEntry.setDelivered(true);
-                            publishBattleMessage(battle);
-                        }), INITAL_DELAY, DELAY, TimeUnit.MILLISECONDS);
+                () -> {
+                    try {
+                        battle.getLog().stream()
+                                .filter(logEntry -> !logEntry.isDelivered())
+                                .findFirst()
+                                .ifPresent(undeliveredEntry -> {
+                                    undeliveredEntry.setDelivered(true);
+                                    publishBattleMessage(battle);
+                                });
+                    } catch (Exception ex) {
+                        logger.error("A problem occurred while sending messages: ", ex);
+                    }
+                }, INITAL_DELAY, DELAY, TimeUnit.MILLISECONDS);
     }
 }

@@ -124,7 +124,7 @@ public class CombatManager {
     }
 
     private int getDamageToPlayer(EnemyDto enemy, StatsDto player, PlayerAction playerAction) {
-        int defense = playerAction.getAction().equals(PARRY) ?
+        int defense = playerAction != null && PARRY.equals(playerAction.getAction()) ?
                 player.getDefense() * PARRY_DEFENSE_MULTIPLIER :
                 player.getDefense();
         return Math.max(enemy.getStats().getAttack() - defense, 0);

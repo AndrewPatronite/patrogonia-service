@@ -11,6 +11,8 @@ import com.patronite.service.dto.player.PlayerDto;
 import com.patronite.service.dto.player.StatsDto;
 import com.patronite.service.message.BattleMessenger;
 import com.patronite.service.stats.StatsManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -31,6 +33,7 @@ public class BattleManager {
     private final SaveManager saveManager;
     private final StatsManager statsManager;
     private final LevelManager levelManager;
+    private static final Logger logger = LoggerFactory.getLogger(BattleManager.class);
 
     public BattleManager(BattleGenerator battleGenerator, BattleMessenger battleMessenger,
                          RoundManager roundManager, SpoilsManager spoilsManager, SaveManager saveManager, StatsManager statsManager, LevelManager levelManager) {
@@ -73,13 +76,17 @@ public class BattleManager {
     }
 
     private void conductRound(BattleDto battle) {
-        synchronized (battle.getId()) {
-            if (battle.getStatus().equals(BattleStatus.IN_PROGRESS)) {
-                BattleStatus battleStatus = roundManager.conductRound(battle);
-                battle.clearPlayerActions();
-                handleBattleStatus(battle, battleStatus);
-                battleMessenger.publishBattleMessagesForCurrentRound(battle);
+        try {
+            synchronized (battle.getId()) {
+                if (battle.getStatus().equals(BattleStatus.IN_PROGRESS)) {
+                    BattleStatus battleStatus = roundManager.conductRound(battle);
+                    battle.clearPlayerActions();
+                    handleBattleStatus(battle, battleStatus);
+                    battleMessenger.publishBattleMessagesForCurrentRound(battle);
+                }
             }
+        } catch (Exception ex) {
+            logger.error("A problem occurred while conducting the round: ", ex);
         }
     }
 

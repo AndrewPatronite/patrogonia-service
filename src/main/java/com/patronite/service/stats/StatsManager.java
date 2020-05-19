@@ -5,8 +5,10 @@ import com.patronite.service.dto.player.StatsDto;
 import com.patronite.service.model.Stats;
 import com.patronite.service.repository.StatsRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
+@Transactional
 public class StatsManager {
     private final StatsRepository statsRepository;
 
