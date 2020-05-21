@@ -82,4 +82,16 @@ public class PlayerController {
         }
         return response;
     }
+
+    @PutMapping(value = "/loadSave/{playerId}")
+    public ResponseEntity<Integer> loadSave(@PathVariable int playerId) {
+        ResponseEntity<Integer> response;
+        try {
+            playerService.loadLastSave(playerId);
+            response = new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception ex) {
+            response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+    }
 }

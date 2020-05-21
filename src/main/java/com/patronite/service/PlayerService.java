@@ -43,6 +43,7 @@ public class PlayerService {
         }
         Level levelStats = levelManager.getLevel(1);
         Player player = playerRepository.save(PlayerAssembler.entity(playerDto, levelStats));
+        saveManager.save(getPlayer(player.getId()));
         return player.getId();
     }
 
@@ -90,5 +91,10 @@ public class PlayerService {
                     .ifPresent(battleId -> playerDto.setBattleId(battleId.toString()));
             return playerDto;
         }).collect(Collectors.toList());
+    }
+
+    public void loadLastSave(int playerId) {
+        battleManager.removePlayerFromBattle(playerId);
+        saveManager.loadLastSave(playerId);
     }
 }

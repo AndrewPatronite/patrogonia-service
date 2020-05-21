@@ -1,5 +1,6 @@
 package com.patronite.service.battle;
 
+import com.google.common.collect.Sets;
 import com.patronite.service.dto.player.LocationDto;
 import com.patronite.service.level.LevelManager;
 import com.patronite.service.model.Location;
@@ -15,10 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.*;
 
 @Component
@@ -95,10 +93,26 @@ public class BattleManager {
     }
 
     public void joinBattle(StatsDto player, UUID battleUuid) {
+        removePlayerFromBattle(player.getPlayerId());
         BattleDto battle = battles.get(battleUuid);
         battle.addPlayer(player);
         battle.addLogEntry(String.format("%s joins the battle!", player.getPlayerName()));
         battleMessenger.publishBattleMessage(battle);
+    }
+
+    public void removePlayerFromBattle(int playerId) {
+        Set<UUID> battlesToRemove = Sets.newHashSet();
+        battles.values().stream()
+                .filter(battle -> battle.getPlayerStats().containsKey(playerId))
+                .forEach(battleDto -> {
+                    battleDto.getRoundPlayerActions().remove(playerId);
+                    battleDto.getPlayerStats().remove(playerId);
+                    battleDto.getPlayerRewards().remove(playerId);
+                    if (battleDto.getPlayerStats().isEmpty()) {
+                        battlesToRemove.add(battleDto.getId());
+                    }
+                });
+        battles.keySet().removeAll(battlesToRemove);
     }
 
     private void handleBattleStatus(BattleDto battle, BattleStatus battleStatus) {
