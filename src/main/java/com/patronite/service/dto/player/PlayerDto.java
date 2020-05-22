@@ -1,12 +1,13 @@
 package com.patronite.service.dto.player;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 
 public class PlayerDto implements Serializable {
-    private static final long serialVersionUID = 4907150542890149455L;
+    private static final long serialVersionUID = 6260902686411060208L;
     private int id;
     private String name;
     private String username;
@@ -16,6 +17,8 @@ public class PlayerDto implements Serializable {
     private String battleId;
     private boolean saveGame;
     private List<SpellDto> spells = newArrayList();
+
+    private Date lastUpdate = new Date();
 
     public int getId() {
         return id;
@@ -96,9 +99,19 @@ public class PlayerDto implements Serializable {
                 ", name='" + name + '\'' +
                 ", username='" + username + '\'' +
                 ", location=" + location +
-                ", statsDto=" + stats +
+                ", stats=" + stats +
                 ", battleId='" + battleId + '\'' +
                 ", saveGame=" + saveGame +
+                ", spells=" + spells +
+                ", lastUpdate=" + lastUpdate +
                 '}';
+    }
+
+    public Date getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
     }
 }

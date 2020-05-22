@@ -16,6 +16,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 import javax.management.InstanceAlreadyExistsException;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -77,6 +78,7 @@ public class PlayerService {
         }
         PlayerAssembler.updatePlayer(player, updatedPlayerDto);
         playerRepository.save(player);
+        updatedPlayerDto.setLastUpdate(new Date());
         playerMessenger.publishPlayerMessage(updatedPlayerDto);
         logger.info("Updated player {}", updatedPlayerDto);
         return updatedPlayerDto;

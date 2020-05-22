@@ -12,6 +12,7 @@ import com.patronite.service.model.Save;
 import com.patronite.service.model.Stats;
 import com.patronite.service.spell.Spell;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,7 @@ public class PlayerAssembler {
         setStatsDto(playerDto, player);
         setLocationDto(playerDto, player);
         setSpellDtos(playerDto, spells);
+        playerDto.setLastUpdate(new Date());
         return playerDto;
     }
 
