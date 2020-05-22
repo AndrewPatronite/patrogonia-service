@@ -22,9 +22,10 @@ public class WebSocketConfig implements WebSocketConfigurer {
 	}
 
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+		String[] allowedOrigins = environment.getProperty("patrogonia-service.crossorigin", String[].class);
 		registry.addHandler(playerMessenger, "/players")
-				.setAllowedOrigins(environment.getProperty("patrogonia-service.crossorigin"));
+				.setAllowedOrigins(allowedOrigins);
 		registry.addHandler(battleMessenger, "/battles")
-				.setAllowedOrigins(environment.getProperty("patrogonia-service.crossorigin"));
+				.setAllowedOrigins(allowedOrigins);
 	}
 }
