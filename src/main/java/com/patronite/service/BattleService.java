@@ -20,8 +20,4 @@ public class BattleService {
     public BattleDto getBattle(String battleId) {
         return battleManager.getBattle(battleId);
     }
-
-    public void joinBattle(String battleId, StatsDto player) {
-        battleManager.joinBattle(battleId, player);
-    }
 }

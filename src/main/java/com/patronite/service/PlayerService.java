@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
-import javax.management.InstanceAlreadyExistsException;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,14 +26,16 @@ public class PlayerService {
     private final BattleManager battleManager;
     private final LevelManager levelManager;
     private final SaveManager saveManager;
+    private final PlayerAssembler playerAssembler;
     private static final Logger logger = LoggerFactory.getLogger(PlayerService.class);
 
-    public PlayerService(PlayerRepository playerRepository, PlayerMessenger playerMessenger, BattleManager battleManager, LevelManager levelManager, SaveManager saveManager) {
+    public PlayerService(PlayerRepository playerRepository, PlayerMessenger playerMessenger, BattleManager battleManager, LevelManager levelManager, SaveManager saveManager, PlayerAssembler playerAssembler) {
         this.playerRepository = playerRepository;
         this.playerMessenger = playerMessenger;
         this.battleManager = battleManager;
         this.levelManager = levelManager;
         this.saveManager = saveManager;
+        this.playerAssembler = playerAssembler;
     }
 
     public int create(PlayerDto playerDto) {
@@ -43,7 +44,7 @@ public class PlayerService {
             throw new IllegalArgumentException(String.format("Player with username %s already exists", username));
         }
         Level levelStats = levelManager.getLevel(1);
-        Player player = playerRepository.save(PlayerAssembler.entity(playerDto, levelStats));
+        Player player = playerRepository.save(playerAssembler.entity(playerDto, levelStats));
         saveManager.save(getPlayer(player.getId()));
         return player.getId();
     }
@@ -60,7 +61,7 @@ public class PlayerService {
     public PlayerDto getPlayer(int playerId) {
         Player player = playerRepository.getOne(playerId);
         List<Spell> spells = levelManager.getSpells(player.getStats().getLevel());
-        return PlayerAssembler.dto(player, spells);
+        return playerAssembler.dto(player, spells);
     }
 
     public PlayerDto update(PlayerDto updatedPlayerDto) {
@@ -76,7 +77,7 @@ public class PlayerService {
                             () -> battleManager.spawnOrDontSpawnBattle(updatedPlayerDto, player.getLocation())
                                     .ifPresent(battle -> updatedPlayerDto.setBattleId(battle.getId().toString())));
         }
-        PlayerAssembler.updatePlayer(player, updatedPlayerDto);
+        playerAssembler.updatePlayer(player, updatedPlayerDto);
         playerRepository.save(player);
         updatedPlayerDto.setLastUpdate(new Date());
         playerMessenger.publishPlayerMessage(updatedPlayerDto);
@@ -88,7 +89,7 @@ public class PlayerService {
         List<Player> players = playerRepository.findByLocation(mapName);
         return players.stream().map(player -> {
             List<Spell> spells = levelManager.getSpells(player.getStats().getLevel());
-            PlayerDto playerDto = PlayerAssembler.dto(player, spells);
+            PlayerDto playerDto = playerAssembler.dto(player, spells);
             battleManager.getPlayerBattleId(player.getId())
                     .ifPresent(battleId -> playerDto.setBattleId(battleId.toString()));
             return playerDto;

@@ -11,16 +11,18 @@ import com.patronite.service.model.Player;
 import com.patronite.service.model.Save;
 import com.patronite.service.model.Stats;
 import com.patronite.service.spell.Spell;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
 public class PlayerAssembler {
     private PlayerAssembler() {
     }
 
-    public static PlayerDto dto(Player player, List<Spell> spells) {
+    public PlayerDto dto(Player player, List<Spell> spells) {
         PlayerDto playerDto = new PlayerDto();
         playerDto.setId(player.getId());
         playerDto.setName(player.getName());
@@ -38,7 +40,7 @@ public class PlayerAssembler {
                 .collect(Collectors.toList()));
     }
 
-    public static Player entity(PlayerDto playerDto, Level levelStats) {
+    public Player entity(PlayerDto playerDto, Level levelStats) {
         Player player = new Player();
         player.setId(playerDto.getId());
         player.setName(playerDto.getName());
@@ -50,7 +52,7 @@ public class PlayerAssembler {
         return player;
     }
 
-    public static void updatePlayer(Player player, PlayerDto updatedPlayerDto) {
+    public void updatePlayer(Player player, PlayerDto updatedPlayerDto) {
         if (updatedPlayerDto.getName() != null) {
             player.setName(updatedPlayerDto.getName());
         }

@@ -88,10 +88,6 @@ public class BattleManager {
         }
     }
 
-    public void joinBattle(String battleId, StatsDto player) {
-        joinBattle(player, UUID.fromString(battleId));
-    }
-
     public void joinBattle(StatsDto player, UUID battleUuid) {
         removePlayerFromBattle(player.getPlayerId());
         BattleDto battle = battles.get(battleUuid);

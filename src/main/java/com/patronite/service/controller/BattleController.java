@@ -38,16 +38,4 @@ public class BattleController {
         }
         return response;
     }
-
-    @PostMapping(value = "/join/{battleId}")
-    public ResponseEntity<Integer> joinBattle(@PathVariable String battleId, @RequestBody StatsDto player) {
-        ResponseEntity<Integer> response;
-        try {
-            battleService.joinBattle(battleId, player);
-            response = new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception ex) {
-            response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return response;
-    }
 }

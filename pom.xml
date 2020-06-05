@@ -22,11 +22,13 @@
         <org.springframework.boot.version>2.2.6.RELEASE</org.springframework.boot.version>
         <mysql-connector-java.version>8.0.19</mysql-connector-java.version>
         <commons-dbcp.version>1.4</commons-dbcp.version>
-        <maven.compiler.release>11</maven.compiler.release>
+        <org.junit.jupiter.version>5.7.0-M1</org.junit.jupiter.version>
+        <org.mockito.version>3.3.3</org.mockito.version>
 
         <frontend.relative.path>../patrogonia</frontend.relative.path>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.release>11</maven.compiler.release>
         <java.version>1.11</java.version>
     </properties>
 
@@ -97,6 +99,21 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-maven-plugin</artifactId>
             <version>${org.springframework.boot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${org.junit.jupiter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${org.mockito.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${org.mockito.version}</version>
         </dependency>
     </dependencies>
 
