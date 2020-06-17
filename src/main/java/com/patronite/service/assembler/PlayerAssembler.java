@@ -34,7 +34,7 @@ public class PlayerAssembler {
         return playerDto;
     }
 
-    private static void setSpellDtos(PlayerDto playerDto, List<Spell> spells) {
+    public void setSpellDtos(PlayerDto playerDto, List<Spell> spells) {
         playerDto.setSpells(spells.stream()
                 .map(spell -> new SpellDto(spell.name(), spell.getMp(), BattleTarget.ENEMY == spell.getBattleTarget()))
                 .collect(Collectors.toList()));

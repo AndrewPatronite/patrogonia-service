@@ -46,8 +46,10 @@ public class BattleManager {
 
     public Optional<BattleDto> spawnOrDontSpawnBattle(PlayerDto playerDto, Location lastLocation) {
         Optional<BattleDto> potentialBattle = battleGenerator.spawnOrDontSpawnBattle(playerDto, lastLocation);
-        potentialBattle.ifPresent(battle -> battles.put(battle.getId(), battle));
-        //TODO clean up old player battles if any
+        potentialBattle.ifPresent(battle -> {
+            removePlayerFromBattle(playerDto.getId());
+            battles.put(battle.getId(), battle);
+        });
         return potentialBattle;
     }
 

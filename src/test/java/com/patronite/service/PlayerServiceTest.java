@@ -28,6 +28,7 @@ import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -41,6 +42,7 @@ class PlayerServiceTest {
     @Mock private SaveManager saveManager;
     @Mock private PlayerAssembler playerAssembler;
     private static final int PLAYER_ID = 1;
+    private static final int PLAYER_LEVEL = 3;
     @Mock private Player player;
     @Mock private Stats playerStats;
 
@@ -48,6 +50,7 @@ class PlayerServiceTest {
     void setup() {
         lenient().when(player.getId()).thenReturn(PLAYER_ID);
         lenient().when(player.getStats()).thenReturn(playerStats);
+        lenient().when(playerStats.getLevel()).thenReturn(PLAYER_LEVEL);
         lenient().when(playerRepository.getOne(PLAYER_ID)).thenReturn(player);
     }
 
@@ -108,14 +111,17 @@ class PlayerServiceTest {
     @Test
     void updateSavingGame() {
         PlayerDto updatedPlayerDto = mock(PlayerDto.class);
+        List<Spell> spells = singletonList(Spell.HEAL);
         when(updatedPlayerDto.getId()).thenReturn(PLAYER_ID);
         when(updatedPlayerDto.isSaveGame()).thenReturn(true);
+        when(levelManager.getSpells(PLAYER_LEVEL)).thenReturn(spells);
 
         assertSame(updatedPlayerDto, subject.update(updatedPlayerDto));
 
         verify(saveManager).save(updatedPlayerDto);
         verify(playerAssembler).updatePlayer(player, updatedPlayerDto);
         verify(playerRepository).save(player);
+        verify(playerAssembler).setSpellDtos(updatedPlayerDto, spells);
         verify(updatedPlayerDto).setLastUpdate(any(Date.class));
         verify(playerMessenger).publishPlayerMessage(updatedPlayerDto);
     }
@@ -126,10 +132,12 @@ class PlayerServiceTest {
         LocationDto location = mock(LocationDto.class);
         BattleDto battle = mock(BattleDto.class);
         UUID battleId = UUID.randomUUID();
+        List<Spell> spells = singletonList(Spell.HEAL);
         when(updatedPlayerDto.getId()).thenReturn(PLAYER_ID);
         when(battle.getId()).thenReturn(battleId);
         when(updatedPlayerDto.getLocation()).thenReturn(location);
         when(battleManager.findBattleInProgressAtLocation(location)).thenReturn(Optional.of(battle));
+        when(levelManager.getSpells(PLAYER_LEVEL)).thenReturn(spells);
 
         assertSame(updatedPlayerDto, subject.update(updatedPlayerDto));
 
@@ -139,6 +147,7 @@ class PlayerServiceTest {
         verify(updatedPlayerDto).setBattleId(battleId.toString());
         verify(playerAssembler).updatePlayer(player, updatedPlayerDto);
         verify(playerRepository).save(player);
+        verify(playerAssembler).setSpellDtos(updatedPlayerDto, spells);
         verify(updatedPlayerDto).setLastUpdate(any(Date.class));
         verify(playerMessenger).publishPlayerMessage(updatedPlayerDto);
     }
@@ -149,11 +158,13 @@ class PlayerServiceTest {
         LocationDto location = mock(LocationDto.class);
         BattleDto battle = mock(BattleDto.class);
         UUID battleId = UUID.randomUUID();
+        List<Spell> spells = singletonList(Spell.HEAL);
         when(updatedPlayerDto.getId()).thenReturn(PLAYER_ID);
         when(battle.getId()).thenReturn(battleId);
         when(updatedPlayerDto.getLocation()).thenReturn(location);
         when(battleManager.findBattleInProgressAtLocation(location)).thenReturn(Optional.empty());
         when(battleManager.spawnOrDontSpawnBattle(updatedPlayerDto, player.getLocation())).thenReturn(Optional.of(battle));
+        when(levelManager.getSpells(PLAYER_LEVEL)).thenReturn(spells);
 
         assertSame(updatedPlayerDto, subject.update(updatedPlayerDto));
 
@@ -161,6 +172,7 @@ class PlayerServiceTest {
         verify(updatedPlayerDto).setBattleId(battleId.toString());
         verify(playerAssembler).updatePlayer(player, updatedPlayerDto);
         verify(playerRepository).save(player);
+        verify(playerAssembler).setSpellDtos(updatedPlayerDto, spells);
         verify(updatedPlayerDto).setLastUpdate(any(Date.class));
         verify(playerMessenger).publishPlayerMessage(updatedPlayerDto);
     }

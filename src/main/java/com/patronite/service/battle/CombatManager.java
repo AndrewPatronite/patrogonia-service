@@ -95,10 +95,13 @@ public class CombatManager {
                 int playerHpTotal = playerTarget.getHpTotal();
                 int restoredHp = playerHp + spell.getEffect() > playerHpTotal ?
                         playerHpTotal - playerHp :
-                        playerHp + spell.getEffect();
-                playerTarget.setHp(restoredHp);
-                battle.addLogEntry(String.format("%s casts %s restoring %s HP to %s.",
-                        playerStats.getPlayerName(), spellName, restoredHp, playerTarget.getPlayerName()));
+                        spell.getEffect();
+                playerTarget.setHp(playerHp + restoredHp);
+                battle.addLogEntry(String.format("%s casts %s restoring %s HP%s.",
+                        playerStats.getPlayerName(), spellName, restoredHp,
+                        playerStats.getPlayerId() == playerTarget.getPlayerId() ?
+                                ""
+                                : String.format(" to %s", playerTarget.getPlayerName())));
             }
         }
     }
