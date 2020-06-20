@@ -79,8 +79,11 @@ public class PlayerService {
         }
         playerAssembler.updatePlayer(player, updatedPlayerDto);
         playerRepository.save(player);
-        List<Spell> spells = levelManager.getSpells(player.getStats().getLevel());
+        int playerLevel = player.getStats().getLevel();
+        List<Spell> spells = levelManager.getSpells(playerLevel);
         playerAssembler.setSpellDtos(updatedPlayerDto, spells);
+        updatedPlayerDto.getStats().setXpTillNextLevel(
+                levelManager.getXpTillNextLevel(playerLevel, updatedPlayerDto.getStats().getXp()));
         updatedPlayerDto.setLastUpdate(new Date());
         playerMessenger.publishPlayerMessage(updatedPlayerDto);
         logger.info("Updated player {}", updatedPlayerDto);

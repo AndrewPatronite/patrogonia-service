@@ -4,6 +4,7 @@ import com.patronite.service.spell.Spell;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -39,5 +40,13 @@ public class LevelManager {
             }
         }
         return levelPromotion;
+    }
+
+    public int getXpTillNextLevel(int playerLevel, int xp) {
+        Map<Integer, Level> levelMap = levels.levelMap();
+        Level nextLevel = levelMap.get(playerLevel + 1);
+        return nextLevel != null ?
+                nextLevel.getExperienceRequired() - xp :
+                0;
     }
 }

@@ -5,6 +5,7 @@ import com.patronite.service.battle.BattleManager;
 import com.patronite.service.dto.BattleDto;
 import com.patronite.service.dto.player.LocationDto;
 import com.patronite.service.dto.player.PlayerDto;
+import com.patronite.service.dto.player.StatsDto;
 import com.patronite.service.level.Level;
 import com.patronite.service.level.LevelManager;
 import com.patronite.service.message.PlayerMessenger;
@@ -43,6 +44,7 @@ class PlayerServiceTest {
     @Mock private PlayerAssembler playerAssembler;
     private static final int PLAYER_ID = 1;
     private static final int PLAYER_LEVEL = 3;
+    private static final int PLAYER_XP = 45;
     @Mock private Player player;
     @Mock private Stats playerStats;
 
@@ -115,6 +117,10 @@ class PlayerServiceTest {
         when(updatedPlayerDto.getId()).thenReturn(PLAYER_ID);
         when(updatedPlayerDto.isSaveGame()).thenReturn(true);
         when(levelManager.getSpells(PLAYER_LEVEL)).thenReturn(spells);
+        StatsDto playerStatsDto = mock(StatsDto.class);
+        when(playerStatsDto.getXp()).thenReturn(PLAYER_XP);
+        when(updatedPlayerDto.getStats()).thenReturn(playerStatsDto);
+        when(levelManager.getXpTillNextLevel(PLAYER_LEVEL, PLAYER_XP)).thenReturn(15);
 
         assertSame(updatedPlayerDto, subject.update(updatedPlayerDto));
 
@@ -122,6 +128,7 @@ class PlayerServiceTest {
         verify(playerAssembler).updatePlayer(player, updatedPlayerDto);
         verify(playerRepository).save(player);
         verify(playerAssembler).setSpellDtos(updatedPlayerDto, spells);
+        verify(playerStatsDto).setXpTillNextLevel(15);
         verify(updatedPlayerDto).setLastUpdate(any(Date.class));
         verify(playerMessenger).publishPlayerMessage(updatedPlayerDto);
     }
@@ -138,6 +145,10 @@ class PlayerServiceTest {
         when(updatedPlayerDto.getLocation()).thenReturn(location);
         when(battleManager.findBattleInProgressAtLocation(location)).thenReturn(Optional.of(battle));
         when(levelManager.getSpells(PLAYER_LEVEL)).thenReturn(spells);
+        StatsDto playerStatsDto = mock(StatsDto.class);
+        when(playerStatsDto.getXp()).thenReturn(PLAYER_XP);
+        when(updatedPlayerDto.getStats()).thenReturn(playerStatsDto);
+        when(levelManager.getXpTillNextLevel(PLAYER_LEVEL, PLAYER_XP)).thenReturn(15);
 
         assertSame(updatedPlayerDto, subject.update(updatedPlayerDto));
 
@@ -148,6 +159,7 @@ class PlayerServiceTest {
         verify(playerAssembler).updatePlayer(player, updatedPlayerDto);
         verify(playerRepository).save(player);
         verify(playerAssembler).setSpellDtos(updatedPlayerDto, spells);
+        verify(playerStatsDto).setXpTillNextLevel(15);
         verify(updatedPlayerDto).setLastUpdate(any(Date.class));
         verify(playerMessenger).publishPlayerMessage(updatedPlayerDto);
     }
@@ -165,6 +177,10 @@ class PlayerServiceTest {
         when(battleManager.findBattleInProgressAtLocation(location)).thenReturn(Optional.empty());
         when(battleManager.spawnOrDontSpawnBattle(updatedPlayerDto, player.getLocation())).thenReturn(Optional.of(battle));
         when(levelManager.getSpells(PLAYER_LEVEL)).thenReturn(spells);
+        StatsDto playerStatsDto = mock(StatsDto.class);
+        when(playerStatsDto.getXp()).thenReturn(PLAYER_XP);
+        when(updatedPlayerDto.getStats()).thenReturn(playerStatsDto);
+        when(levelManager.getXpTillNextLevel(PLAYER_LEVEL, PLAYER_XP)).thenReturn(15);
 
         assertSame(updatedPlayerDto, subject.update(updatedPlayerDto));
 
@@ -173,6 +189,7 @@ class PlayerServiceTest {
         verify(playerAssembler).updatePlayer(player, updatedPlayerDto);
         verify(playerRepository).save(player);
         verify(playerAssembler).setSpellDtos(updatedPlayerDto, spells);
+        verify(playerStatsDto).setXpTillNextLevel(15);
         verify(updatedPlayerDto).setLastUpdate(any(Date.class));
         verify(playerMessenger).publishPlayerMessage(updatedPlayerDto);
     }

@@ -3,11 +3,12 @@ package com.patronite.service.dto.player;
 import java.io.Serializable;
 
 public class StatsDto implements Serializable {
-    private static final long serialVersionUID = 1573695034629954952L;
+    private static final long serialVersionUID = -1948420991263200424L;
     private int playerId;
     private String playerName;
     private int level;
     private int xp;
+    private int xpTillNextLevel;
     private int hp;
     private int hpTotal;
     private int mp;
@@ -47,6 +48,14 @@ public class StatsDto implements Serializable {
 
     public void setXp(int xp) {
         this.xp = xp;
+    }
+
+    public int getXpTillNextLevel() {
+        return xpTillNextLevel;
+    }
+
+    public void setXpTillNextLevel(int xpTillNextLevel) {
+        this.xpTillNextLevel = xpTillNextLevel;
     }
 
     public int getHp() {
