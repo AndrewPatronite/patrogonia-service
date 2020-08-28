@@ -5,11 +5,12 @@ import com.google.common.base.Objects;
 import java.io.Serializable;
 
 public class LocationDto implements Serializable {
-    private static final long serialVersionUID = 5185534605422750333L;
+    private static final long serialVersionUID = 7935083276497636509L;
     private String mapName;
     private int rowIndex;
     private int columnIndex;
     private String facing = "down";
+    private String entranceName;
 
     public String getMapName() {
         return mapName;
@@ -43,6 +44,14 @@ public class LocationDto implements Serializable {
         this.facing = facing;
     }
 
+    public String getEntranceName() {
+        return entranceName;
+    }
+
+    public void setEntranceName(String entranceName) {
+        this.entranceName = entranceName;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -50,12 +59,14 @@ public class LocationDto implements Serializable {
         LocationDto that = (LocationDto) o;
         return rowIndex == that.rowIndex &&
                 columnIndex == that.columnIndex &&
-                Objects.equal(mapName, that.mapName);
+                Objects.equal(mapName, that.mapName) &&
+                Objects.equal(facing, that.facing) &&
+                Objects.equal(entranceName, that.entranceName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(mapName, rowIndex, columnIndex);
+        return Objects.hashCode(mapName, rowIndex, columnIndex, facing, entranceName);
     }
 
     @Override
@@ -65,6 +76,7 @@ public class LocationDto implements Serializable {
                 ", rowIndex=" + rowIndex +
                 ", columnIndex=" + columnIndex +
                 ", facing='" + facing + '\'' +
+                ", entranceName='" + entranceName + '\'' +
                 '}';
     }
 }

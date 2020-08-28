@@ -10,10 +10,12 @@ import com.patronite.service.model.Location;
 import com.patronite.service.model.Player;
 import com.patronite.service.model.Save;
 import com.patronite.service.model.Stats;
+import com.patronite.service.spell.ReturnDestination;
 import com.patronite.service.spell.Spell;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,21 +24,22 @@ public class PlayerAssembler {
     private PlayerAssembler() {
     }
 
-    public PlayerDto dto(Player player, List<Spell> spells) {
+    public PlayerDto dto(Player player, List<Spell> spells, int xpTillNextLevel) {
         PlayerDto playerDto = new PlayerDto();
         playerDto.setId(player.getId());
         playerDto.setName(player.getName());
         playerDto.setUsername(player.getUsername());
-        setStatsDto(playerDto, player);
+        setStatsDto(playerDto, player, xpTillNextLevel);
         setLocationDto(playerDto, player);
         setSpellDtos(playerDto, spells);
         playerDto.setLastUpdate(new Date());
+        playerDto.setVisited(player.getVisited());
         return playerDto;
     }
 
     public void setSpellDtos(PlayerDto playerDto, List<Spell> spells) {
         playerDto.setSpells(spells.stream()
-                .map(spell -> new SpellDto(spell.name(), spell.getMp(), BattleTarget.ENEMY == spell.getBattleTarget()))
+                .map(spell -> new SpellDto(spell.name(), spell.getMp(), BattleTarget.ENEMY == spell.getBattleTarget(), spell.isBattleSpell()))
                 .collect(Collectors.toList()));
     }
 
@@ -87,6 +90,7 @@ public class PlayerAssembler {
             locationDto.setMapName(location.getMapName());
             locationDto.setRowIndex(location.getRowIndex());
             locationDto.setColumnIndex(location.getColumnIndex());
+            locationDto.setEntranceName(location.getEntranceName());
             playerDto.setLocation(locationDto);
         }
     }
@@ -99,12 +103,13 @@ public class PlayerAssembler {
             location.setMapName(locationDto.getMapName());
             location.setRowIndex(locationDto.getRowIndex());
             location.setColumnIndex(locationDto.getColumnIndex());
+            location.setEntranceName(locationDto.getEntranceName());
             player.setLocation(location);
             location.setPlayer(player);
         }
     }
 
-    private static void setStatsDto(PlayerDto playerDto, Player player) {
+    private static void setStatsDto(PlayerDto playerDto, Player player, int xpTillNextLevel) {
         Stats stats = player.getStats();
         if (stats != null) {
             StatsDto statsDto = new StatsDto();
@@ -112,6 +117,7 @@ public class PlayerAssembler {
             statsDto.setPlayerName(player.getName());
             statsDto.setLevel(stats.getLevel());
             statsDto.setXp(stats.getXp());
+            statsDto.setXpTillNextLevel(xpTillNextLevel);
             statsDto.setHp(stats.getHp());
             statsDto.setHpTotal(stats.getHpTotal());
             statsDto.setMp(stats.getMp());
@@ -159,9 +165,21 @@ public class PlayerAssembler {
         LocationDto locationDto = playerDto.getLocation();
         if (locationDto != null) {
             Location location = player.getLocation();
+            if (!location.getMapName().equals(locationDto.getMapName())) {
+                location.setEntranceName(location.getMapName());
+                locationDto.setEntranceName(location.getMapName());
+            }
             location.setMapName(locationDto.getMapName());
             location.setRowIndex(locationDto.getRowIndex());
             location.setColumnIndex(locationDto.getColumnIndex());
+            if (playerDto.isSaveGame()) {
+                String townName = ReturnDestination.getTownName(location.getMapName(), location.getRowIndex(), location.getColumnIndex());
+                if (player.getVisited() == null) {
+                    player.setVisited(new HashSet<>());
+                }
+                player.getVisited().add(townName);
+                playerDto.setVisited(player.getVisited());
+            }
         }
     }
 

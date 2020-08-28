@@ -1,6 +1,8 @@
 package com.patronite.service.model;
 
 import javax.persistence.*;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "player", uniqueConstraints = {@UniqueConstraint(columnNames = {"username"})})
@@ -16,6 +18,8 @@ public class Player {
     private Location location;
     @OneToOne(mappedBy = "player", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Stats stats;
+    @ElementCollection
+    private Set<String> visited;
 
     public int getId() {
         return id;
@@ -63,5 +67,13 @@ public class Player {
 
     public void setStats(Stats stats) {
         this.stats = stats;
+    }
+
+    public Set<String> getVisited() {
+        return visited;
+    }
+
+    public void setVisited(Set<String> visited) {
+        this.visited = visited;
     }
 }

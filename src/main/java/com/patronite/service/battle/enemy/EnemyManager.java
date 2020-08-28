@@ -18,9 +18,9 @@ public class EnemyManager {
 
     public EnemyManager() {
         locationToEnemies = new ConcurrentHashMap<>();
-        locationToEnemies.put("field1", singletonList(Enemy.MOUSE));
-        locationToEnemies.put("cave1", asList(Enemy.MOUSE, Enemy.RAT, Enemy.GOBLIN));
-        locationToEnemies.put("field2", asList(Enemy.MOUSE, Enemy.RAT, Enemy.BOAR, Enemy.SKELETON, Enemy.KNIGHT));
+        locationToEnemies.put("Atoris", singletonList(Enemy.MOUSE));
+        locationToEnemies.put("Lava Grotto", asList(Enemy.MOUSE, Enemy.RAT, Enemy.GOBLIN));
+        locationToEnemies.put("Grimes", asList(Enemy.MOUSE, Enemy.RAT, Enemy.BOAR, Enemy.SKELETON, Enemy.KNIGHT));
     }
 
     public EnemyDto generateEnemy(String mapName) {

@@ -5,6 +5,7 @@ import com.patronite.service.battle.BattleManager;
 import com.patronite.service.dto.BattleDto;
 import com.patronite.service.dto.player.LocationDto;
 import com.patronite.service.dto.player.PlayerDto;
+import com.patronite.service.dto.player.SpellDto;
 import com.patronite.service.dto.player.StatsDto;
 import com.patronite.service.level.Level;
 import com.patronite.service.level.LevelManager;
@@ -13,6 +14,8 @@ import com.patronite.service.model.Player;
 import com.patronite.service.model.Stats;
 import com.patronite.service.repository.PlayerRepository;
 import com.patronite.service.save.SaveManager;
+import com.patronite.service.spell.OutsideDestination;
+import com.patronite.service.spell.ReturnDestination;
 import com.patronite.service.spell.Spell;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +48,7 @@ class PlayerServiceTest {
     private static final int PLAYER_ID = 1;
     private static final int PLAYER_LEVEL = 3;
     private static final int PLAYER_XP = 45;
+    private static final int XP_TILL_NEXT_LEVEL = 10;
     @Mock private Player player;
     @Mock private Stats playerStats;
 
@@ -53,7 +57,9 @@ class PlayerServiceTest {
         lenient().when(player.getId()).thenReturn(PLAYER_ID);
         lenient().when(player.getStats()).thenReturn(playerStats);
         lenient().when(playerStats.getLevel()).thenReturn(PLAYER_LEVEL);
+        lenient().when(playerStats.getXp()).thenReturn(PLAYER_XP);
         lenient().when(playerRepository.getOne(PLAYER_ID)).thenReturn(player);
+        lenient().when(levelManager.getXpTillNextLevel(PLAYER_LEVEL, PLAYER_XP)).thenReturn(XP_TILL_NEXT_LEVEL);
     }
 
     @Test
@@ -63,7 +69,7 @@ class PlayerServiceTest {
         when(levelManager.getLevel(1)).thenReturn(levelStats);
         when(playerAssembler.entity(playerDto, levelStats)).thenReturn(player);
         when(playerRepository.save(player)).thenReturn(player);
-        when(playerAssembler.dto(eq(player), anyList())).thenReturn(playerDto);
+        when(playerAssembler.dto(eq(player), anyList(), eq(XP_TILL_NEXT_LEVEL))).thenReturn(playerDto);
 
         assertEquals(PLAYER_ID, subject.create(playerDto));
 
@@ -105,7 +111,7 @@ class PlayerServiceTest {
         List<Spell> spells = emptyList();
         PlayerDto playerDto = mock(PlayerDto.class);
         when(levelManager.getSpells(player.getStats().getLevel())).thenReturn(spells);
-        when(playerAssembler.dto(player, spells)).thenReturn(playerDto);
+        when(playerAssembler.dto(player, spells, XP_TILL_NEXT_LEVEL)).thenReturn(playerDto);
 
         assertSame(playerDto, subject.getPlayer(PLAYER_ID));
     }
@@ -196,7 +202,7 @@ class PlayerServiceTest {
 
     @Test
     void getPlayers() {
-        String mapName = "field1";
+        String mapName = "Atoris";
         int playerInBattleId = 911;
         UUID battleId = UUID.randomUUID();
         Player playerInBattle = mock(Player.class);
@@ -205,8 +211,8 @@ class PlayerServiceTest {
         when(playerInBattle.getStats()).thenReturn(mock(Stats.class));
         when(playerInBattle.getId()).thenReturn(playerInBattleId);
         when(playerRepository.findByLocation(mapName)).thenReturn(asList(player, playerInBattle));
-        when(playerAssembler.dto(eq(player), anyList())).thenReturn(playerDto);
-        when(playerAssembler.dto(eq(playerInBattle), anyList())).thenReturn(playerInBattleDto);
+        when(playerAssembler.dto(eq(player), anyList(), eq(XP_TILL_NEXT_LEVEL))).thenReturn(playerDto);
+        when(playerAssembler.dto(eq(playerInBattle), anyList(), anyInt())).thenReturn(playerInBattleDto);
         when(battleManager.getPlayerBattleId(PLAYER_ID)).thenReturn(Optional.empty());
         when(battleManager.getPlayerBattleId(playerInBattleId)).thenReturn(Optional.of(battleId));
 
@@ -221,5 +227,113 @@ class PlayerServiceTest {
 
         verify(battleManager).removePlayerFromBattle(PLAYER_ID);
         verify(saveManager).loadLastSave(PLAYER_ID);
+    }
+
+    private PlayerDto getSpellCaster() {
+        PlayerDto playerDto = mock(PlayerDto.class);
+        StatsDto playerStatsDto = mock(StatsDto.class);
+        LocationDto playerLocation = mock(LocationDto.class);
+        when(playerDto.getSpells()).thenReturn(asList(new SpellDto("HEAL", 5, false, true),
+                new SpellDto("RETURN", 5, false, false),
+                new SpellDto("OUTSIDE", 5, false, false),
+                new SpellDto("ICE", 5, true, true)
+        ));
+        when(playerDto.getStats()).thenReturn(playerStatsDto);
+        lenient().when(playerDto.getId()).thenReturn(PLAYER_ID);
+        when(playerStatsDto.getMp()).thenReturn(7);
+        lenient().when(playerStatsDto.getHp()).thenReturn(10);
+        lenient().when(playerStatsDto.getHpTotal()).thenReturn(50);
+        lenient().when(playerDto.getLocation()).thenReturn(playerLocation);
+        return playerDto;
+    }
+
+    @Test
+    void castHeal() {
+        PlayerDto playerDto = getSpellCaster();
+
+        assertSame(playerDto, subject.castSpell(playerDto, "HEAL", Integer.toString(PLAYER_ID)));
+
+        verify(playerDto.getStats()).setHp(Spell.HEAL.getEffect() +  playerDto.getStats().getHp());
+        verify(playerDto.getStats()).setMp(playerDto.getStats().getMp() - Spell.HEAL.getMp());
+    }
+
+    @Test
+    void castHealToMaxHp() {
+        PlayerDto playerDto = getSpellCaster();
+        int hpTotal = playerDto.getStats().getHpTotal();
+        int playerHp = hpTotal - 1;
+        when(playerDto.getStats().getHp()).thenReturn(playerHp);
+
+        assertSame(playerDto, subject.castSpell(playerDto, "HEAL", Integer.toString(PLAYER_ID)));
+
+        verify(playerDto.getStats()).setHp(hpTotal);
+        verify(playerDto.getStats()).setMp(playerDto.getStats().getMp() - Spell.HEAL.getMp());
+    }
+
+    @Test
+    void castHealNotEnoughMp() {
+        PlayerDto playerDto = getSpellCaster();
+        when(playerDto.getStats().getMp()).thenReturn(2);
+
+        assertThrows(IllegalStateException.class, () -> subject.castSpell(playerDto, "HEAL", Integer.toString(PLAYER_ID)));
+
+        verify(playerDto.getStats(), never()).getHpTotal();
+    }
+
+    @Test
+    void castOutside() {
+        PlayerDto playerDto = getSpellCaster();
+        when(playerDto.getLocation().getMapName()).thenReturn("Lava Grotto");
+        when(playerRepository.getOne(PLAYER_ID)).thenReturn(player);
+
+        assertSame(playerDto, subject.castSpell(playerDto, "OUTSIDE", "Atoris"));
+
+        verify(playerDto.getLocation()).setEntranceName("Lava Grotto");
+        verify(playerDto.getLocation()).setMapName("Atoris");
+        verify(playerDto.getLocation()).setRowIndex(OutsideDestination.ATORIS.getRowIndex());
+        verify(playerDto.getLocation()).setColumnIndex(OutsideDestination.ATORIS.getColumnIndex());
+        verify(playerAssembler).updatePlayer(player, playerDto);
+        verify(playerRepository).save(player);
+        verify(playerDto.getStats()).setMp(playerDto.getStats().getMp() - Spell.OUTSIDE.getMp());
+    }
+
+    @Test
+    void castOutsideNotEnoughMp() {
+        PlayerDto playerDto = getSpellCaster();
+        when(playerDto.getStats().getMp()).thenReturn(2);
+
+        assertThrows(IllegalStateException.class, () -> subject.castSpell(playerDto, "OUTSIDE", "Atoris"));
+        verify(playerRepository, never()).getOne(anyInt());
+    }
+
+    @Test
+    void castReturn() {
+        PlayerDto playerDto = getSpellCaster();
+        when(playerRepository.getOne(PLAYER_ID)).thenReturn(player);
+
+        assertSame(playerDto, subject.castSpell(playerDto, "RETURN", "Dewhurst"));
+
+        verify(playerDto.getLocation()).setEntranceName(null);
+        verify(playerDto.getLocation()).setMapName(ReturnDestination.DEWHURST.getMapName());
+        verify(playerDto.getLocation()).setRowIndex(ReturnDestination.DEWHURST.getRowIndex());
+        verify(playerDto.getLocation()).setColumnIndex(ReturnDestination.DEWHURST.getColumnIndex());
+        verify(playerAssembler).updatePlayer(player, playerDto);
+        verify(playerRepository).save(player);
+        verify(playerDto.getStats()).setMp(playerDto.getStats().getMp() - Spell.RETURN.getMp());
+    }
+
+    @Test
+    void castReturnNotEnoughMp() {
+        PlayerDto playerDto = getSpellCaster();
+        when(playerDto.getStats().getMp()).thenReturn(2);
+
+        assertThrows(IllegalStateException.class, () -> subject.castSpell(playerDto, "RETURN", "Dewhurst"));
+        verify(playerRepository, never()).getOne(anyInt());
+    }
+
+    @Test
+    void castUnsupportedSpell() {
+        PlayerDto playerDto = getSpellCaster();
+        assertThrows(IllegalArgumentException.class, () -> subject.castSpell(playerDto, "ICE", null));
     }
 }

@@ -2,7 +2,9 @@ package com.patronite.service.dto.player;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -17,8 +19,8 @@ public class PlayerDto implements Serializable {
     private String battleId;
     private boolean saveGame;
     private List<SpellDto> spells = newArrayList();
-
     private Date lastUpdate = new Date();
+    private Set<String> visited = new HashSet<>();
 
     public int getId() {
         return id;
@@ -92,6 +94,22 @@ public class PlayerDto implements Serializable {
         this.spells = spells;
     }
 
+    public Date getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
+    public Set<String> getVisited() {
+        return visited;
+    }
+
+    public void setVisited(Set<String> visited) {
+        this.visited = visited;
+    }
+
     @Override
     public String toString() {
         return "PlayerDto{" +
@@ -104,14 +122,7 @@ public class PlayerDto implements Serializable {
                 ", saveGame=" + saveGame +
                 ", spells=" + spells +
                 ", lastUpdate=" + lastUpdate +
+                ", visited=" + visited +
                 '}';
-    }
-
-    public Date getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Date lastUpdate) {
-        this.lastUpdate = lastUpdate;
     }
 }

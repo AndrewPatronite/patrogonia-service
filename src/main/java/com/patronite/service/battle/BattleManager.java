@@ -2,6 +2,7 @@ package com.patronite.service.battle;
 
 import com.google.common.collect.Sets;
 import com.patronite.service.dto.player.LocationDto;
+import com.patronite.service.level.Level;
 import com.patronite.service.level.LevelManager;
 import com.patronite.service.model.Location;
 import com.patronite.service.save.SaveManager;
@@ -11,6 +12,7 @@ import com.patronite.service.dto.BattleDto;
 import com.patronite.service.dto.player.PlayerDto;
 import com.patronite.service.dto.player.StatsDto;
 import com.patronite.service.message.BattleMessenger;
+import com.patronite.service.spell.Spell;
 import com.patronite.service.stats.StatsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,7 +160,15 @@ public class BattleManager {
                     reportIncrease(battle, "Attack", attackIncrease);
                     reportIncrease(battle, "Defense", defenseIncrease);
                     reportIncrease(battle, "Agility", agilityIncrease);
+                    reportNewSpell(battle, player, nextLevel);
                 });
+    }
+
+    private void reportNewSpell(BattleDto battle, StatsDto player, Level nextLevel) {
+        nextLevel.getSpellsLearned().forEach(newSpell -> {
+            String spellName = newSpell.name();
+            battle.addLogEntry(String.format("%s learned %s%s spell!", player.getPlayerName(), spellName.substring(0, 1), spellName.substring(1).toLowerCase()));
+        });
     }
 
     private void reportIncrease(BattleDto battle, String attribute, int increase) {

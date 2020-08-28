@@ -15,6 +15,7 @@ public class Location {
     @Column private String mapName;
     @Column private int rowIndex;
     @Column private int columnIndex;
+    @Column private String entranceName;
 
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
@@ -58,5 +59,13 @@ public class Location {
 
     public void setPlayer(Player player) {
         this.player = player;
+    }
+
+    public String getEntranceName() {
+        return entranceName;
+    }
+
+    public void setEntranceName(String entranceName) {
+        this.entranceName = entranceName;
     }
 }

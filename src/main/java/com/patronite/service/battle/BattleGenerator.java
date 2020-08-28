@@ -21,6 +21,7 @@ public class BattleGenerator {
     private static final int MIN_ENEMIES = 1;
     private static final int MAX_ENEMIES = 5;
     private final EnemyManager enemyManager;
+    private final Random spawnRandomizer = new Random();
 
     public BattleGenerator(EnemyManager enemyManager) {
         this.enemyManager = enemyManager;
@@ -44,7 +45,7 @@ public class BattleGenerator {
     }
 
     private boolean shouldSpawn() {
-        return new Random().nextInt(BATTLE_PERCENTAGE_UPPER_THRESHOLD + 1) < BATTLE_PERCENTAGE_LOWER_THRESHOLD;
+        return spawnRandomizer.nextInt(BATTLE_PERCENTAGE_UPPER_THRESHOLD + 1) < BATTLE_PERCENTAGE_LOWER_THRESHOLD;
     }
 
     private List<EnemyDto> generateEnemies(String mapName) {

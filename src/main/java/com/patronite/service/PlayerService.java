@@ -2,12 +2,16 @@ package com.patronite.service;
 
 import com.patronite.service.assembler.PlayerAssembler;
 import com.patronite.service.battle.BattleManager;
+import com.patronite.service.dto.player.LocationDto;
 import com.patronite.service.dto.player.PlayerDto;
+import com.patronite.service.dto.player.StatsDto;
 import com.patronite.service.level.Level;
 import com.patronite.service.level.LevelManager;
 import com.patronite.service.model.Player;
 import com.patronite.service.repository.PlayerRepository;
 import com.patronite.service.save.SaveManager;
+import com.patronite.service.spell.OutsideDestination;
+import com.patronite.service.spell.ReturnDestination;
 import com.patronite.service.spell.Spell;
 import com.patronite.service.message.PlayerMessenger;
 import org.slf4j.Logger;
@@ -18,6 +22,8 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.patronite.service.spell.Spell.*;
 
 @Service
 public class PlayerService {
@@ -61,7 +67,8 @@ public class PlayerService {
     public PlayerDto getPlayer(int playerId) {
         Player player = playerRepository.getOne(playerId);
         List<Spell> spells = levelManager.getSpells(player.getStats().getLevel());
-        return playerAssembler.dto(player, spells);
+        int xpTillNextLevel = levelManager.getXpTillNextLevel(player.getStats().getLevel(), player.getStats().getXp());
+        return playerAssembler.dto(player, spells, xpTillNextLevel);
     }
 
     public PlayerDto update(PlayerDto updatedPlayerDto) {
@@ -94,7 +101,8 @@ public class PlayerService {
         List<Player> players = playerRepository.findByLocation(mapName);
         return players.stream().map(player -> {
             List<Spell> spells = levelManager.getSpells(player.getStats().getLevel());
-            PlayerDto playerDto = playerAssembler.dto(player, spells);
+            int xpTillNextLevel = levelManager.getXpTillNextLevel(player.getStats().getLevel(), player.getStats().getXp());
+            PlayerDto playerDto = playerAssembler.dto(player, spells, xpTillNextLevel);
             battleManager.getPlayerBattleId(player.getId())
                     .ifPresent(battleId -> playerDto.setBattleId(battleId.toString()));
             return playerDto;
@@ -104,5 +112,70 @@ public class PlayerService {
     public void loadLastSave(int playerId) {
         battleManager.removePlayerFromBattle(playerId);
         saveManager.loadLastSave(playerId);
+    }
+
+    public PlayerDto castSpell(PlayerDto playerDto, String spellName, String targetId) {
+        StatsDto playerStats = playerDto.getStats();
+        int mp = playerStats.getMp();
+
+        playerDto.getSpells().stream()
+                .filter(spellDto -> spellDto.getSpellName().equals(spellName))
+                .findFirst().
+                ifPresent(
+                        spell -> {
+                            switch (Spell.valueOf(spell.getSpellName())) {
+                                case HEAL:
+                                    if (Integer.toString(playerDto.getId()).equals(targetId)) {
+                                        if (mp >= HEAL.getMp()) {
+                                            int playerHpTotal = playerStats.getHpTotal();
+                                            int playerHp = playerStats.getHp();
+                                            int restoredHp = playerHp + HEAL.getEffect() > playerHpTotal ?
+                                                    playerHpTotal - playerHp :
+                                                    HEAL.getEffect();
+                                            playerStats.setHp(playerHp + restoredHp);
+                                            playerStats.setMp(mp - HEAL.getMp());
+                                        } else {
+                                            throw new IllegalStateException(String.format("Not enough MP to cast %s", spell.getSpellName()));
+                                        }
+                                    }
+                                    break;
+                                case OUTSIDE:
+                                    if (mp >= OUTSIDE.getMp()) {
+                                        Player player = playerRepository.getOne(playerDto.getId());
+                                        OutsideDestination destination = OutsideDestination.valueOf(targetId.toUpperCase());
+                                        LocationDto location = playerDto.getLocation();
+                                        location.setEntranceName(location.getMapName());
+                                        location.setMapName(targetId);
+                                        location.setRowIndex(destination.getRowIndex());
+                                        location.setColumnIndex(destination.getColumnIndex());
+                                        playerAssembler.updatePlayer(player, playerDto);
+                                        playerRepository.save(player);
+                                        playerStats.setMp(mp - OUTSIDE.getMp());
+                                    } else {
+                                        throw new IllegalStateException(String.format("Not enough MP to cast %s", spell.getSpellName()));
+                                    }
+                                    break;
+                                case RETURN:
+                                    if (mp >= RETURN.getMp()) {
+                                        Player player = playerRepository.getOne(playerDto.getId());
+                                        ReturnDestination destination = ReturnDestination.valueOf(targetId.toUpperCase());
+                                        LocationDto location = playerDto.getLocation();
+                                        location.setEntranceName(null);
+                                        location.setMapName(destination.getMapName());
+                                        location.setRowIndex(destination.getRowIndex());
+                                        location.setColumnIndex(destination.getColumnIndex());
+                                        playerAssembler.updatePlayer(player, playerDto);
+                                        saveManager.save(playerDto);
+                                        playerRepository.save(player);
+                                    } else {
+                                        throw new IllegalStateException(String.format("Not enough MP to cast %s", spell.getSpellName()));
+                                    }
+                                    break;
+                                default:
+                                    throw new IllegalArgumentException(String.format("Unsupported spell %s", spell.getSpellName()));
+                            }
+                        }
+                );
+        return playerDto;
     }
 }

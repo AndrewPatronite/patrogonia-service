@@ -94,4 +94,15 @@ public class PlayerController {
         }
         return response;
     }
+
+    @PutMapping(value = "/castSpell/{spellName}/{targetId}")
+    public ResponseEntity<PlayerDto> castSpell(@RequestBody PlayerDto player, @PathVariable String spellName, @PathVariable String targetId) {
+        ResponseEntity<PlayerDto> response;
+        try {
+            response = new ResponseEntity<>(playerService.castSpell(player, spellName, targetId), HttpStatus.OK);
+        } catch (Exception ex) {
+            response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+    }
 }
