@@ -9,13 +9,13 @@ import com.patronite.service.dto.player.SpellDto;
 import com.patronite.service.dto.player.StatsDto;
 import com.patronite.service.level.Level;
 import com.patronite.service.level.LevelManager;
+import com.patronite.service.location.Town;
 import com.patronite.service.message.PlayerMessenger;
 import com.patronite.service.model.Player;
 import com.patronite.service.model.Stats;
 import com.patronite.service.repository.PlayerRepository;
 import com.patronite.service.save.SaveManager;
 import com.patronite.service.spell.OutsideDestination;
-import com.patronite.service.spell.ReturnDestination;
 import com.patronite.service.spell.Spell;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -314,9 +314,9 @@ class PlayerServiceTest {
         assertSame(playerDto, subject.castSpell(playerDto, "RETURN", "Dewhurst"));
 
         verify(playerDto.getLocation()).setEntranceName(null);
-        verify(playerDto.getLocation()).setMapName(ReturnDestination.DEWHURST.getMapName());
-        verify(playerDto.getLocation()).setRowIndex(ReturnDestination.DEWHURST.getRowIndex());
-        verify(playerDto.getLocation()).setColumnIndex(ReturnDestination.DEWHURST.getColumnIndex());
+        verify(playerDto.getLocation()).setMapName(Town.DEWHURST.getMapName());
+        verify(playerDto.getLocation()).setRowIndex(Town.DEWHURST.getRowIndex());
+        verify(playerDto.getLocation()).setColumnIndex(Town.DEWHURST.getColumnIndex());
         verify(playerAssembler).updatePlayer(player, playerDto);
         verify(playerRepository).save(player);
         verify(playerDto.getStats()).setMp(playerDto.getStats().getMp() - Spell.RETURN.getMp());

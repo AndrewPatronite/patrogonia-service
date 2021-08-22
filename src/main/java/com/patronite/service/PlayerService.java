@@ -7,18 +7,19 @@ import com.patronite.service.dto.player.PlayerDto;
 import com.patronite.service.dto.player.StatsDto;
 import com.patronite.service.level.Level;
 import com.patronite.service.level.LevelManager;
+import com.patronite.service.location.Town;
+import com.patronite.service.message.PlayerMessenger;
 import com.patronite.service.model.Player;
 import com.patronite.service.repository.PlayerRepository;
 import com.patronite.service.save.SaveManager;
 import com.patronite.service.spell.OutsideDestination;
-import com.patronite.service.spell.ReturnDestination;
 import com.patronite.service.spell.Spell;
-import com.patronite.service.message.PlayerMessenger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -76,13 +77,18 @@ public class PlayerService {
         if (updatedPlayerDto.isSaveGame()) {
             saveManager.save(updatedPlayerDto);
         } else {
-            battleManager.findBattleInProgressAtLocation(updatedPlayerDto.getLocation())
-                    .ifPresentOrElse(battle -> {
-                                battleManager.joinBattle(updatedPlayerDto.getStats(), battle.getId());
-                                updatedPlayerDto.setBattleId(battle.getId().toString());
-                            },
-                            () -> battleManager.spawnOrDontSpawnBattle(updatedPlayerDto, player.getLocation())
-                                    .ifPresent(battle -> updatedPlayerDto.setBattleId(battle.getId().toString())));
+            if (Arrays.stream(Town.values())
+                    .anyMatch(town -> town.name().equalsIgnoreCase(updatedPlayerDto.getLocation().getMapName()))) {
+                //Player in town
+            } else {
+                battleManager.findBattleInProgressAtLocation(updatedPlayerDto.getLocation())
+                        .ifPresentOrElse(battle -> {
+                                    battleManager.joinBattle(updatedPlayerDto.getStats(), battle.getId());
+                                    updatedPlayerDto.setBattleId(battle.getId().toString());
+                                },
+                                () -> battleManager.spawnOrDontSpawnBattle(updatedPlayerDto, player.getLocation())
+                                        .ifPresent(battle -> updatedPlayerDto.setBattleId(battle.getId().toString())));
+            }
         }
         playerAssembler.updatePlayer(player, updatedPlayerDto);
         playerRepository.save(player);
@@ -158,12 +164,13 @@ public class PlayerService {
                                 case RETURN:
                                     if (mp >= RETURN.getMp()) {
                                         Player player = playerRepository.getOne(playerDto.getId());
-                                        ReturnDestination destination = ReturnDestination.valueOf(targetId.toUpperCase());
+                                        Town town = Town.valueOf(targetId.toUpperCase());
                                         LocationDto location = playerDto.getLocation();
-                                        location.setEntranceName(null);
-                                        location.setMapName(destination.getMapName());
-                                        location.setRowIndex(destination.getRowIndex());
-                                        location.setColumnIndex(destination.getColumnIndex());
+                                        location.setEntranceName(town.getEntranceName());
+                                        location.setMapName(town.getMapName());
+                                        location.setRowIndex(town.getRowIndex());
+                                        location.setColumnIndex(town.getColumnIndex());
+                                        location.setFacing(town.getTownCenterDirection());
                                         playerAssembler.updatePlayer(player, playerDto);
                                         saveManager.save(playerDto);
                                         playerRepository.save(player);

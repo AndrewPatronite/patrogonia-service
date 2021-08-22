@@ -6,17 +6,15 @@ import com.patronite.service.dto.player.PlayerDto;
 import com.patronite.service.dto.player.SpellDto;
 import com.patronite.service.dto.player.StatsDto;
 import com.patronite.service.level.Level;
+import com.patronite.service.location.Town;
 import com.patronite.service.model.Location;
 import com.patronite.service.model.Player;
 import com.patronite.service.model.Save;
 import com.patronite.service.model.Stats;
-import com.patronite.service.spell.ReturnDestination;
 import com.patronite.service.spell.Spell;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -173,11 +171,13 @@ public class PlayerAssembler {
             location.setRowIndex(locationDto.getRowIndex());
             location.setColumnIndex(locationDto.getColumnIndex());
             if (playerDto.isSaveGame()) {
-                String townName = ReturnDestination.getTownName(location.getMapName(), location.getRowIndex(), location.getColumnIndex());
                 if (player.getVisited() == null) {
                     player.setVisited(new HashSet<>());
                 }
-                player.getVisited().add(townName);
+                Arrays.stream(Town.values())
+                        .filter(town -> town.name().equalsIgnoreCase(location.getMapName()))
+                        .findFirst()
+                        .ifPresent(visitedTown -> player.getVisited().add(visitedTown.name()));
                 playerDto.setVisited(player.getVisited());
             }
         }
