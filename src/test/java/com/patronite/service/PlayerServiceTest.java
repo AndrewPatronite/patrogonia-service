@@ -313,7 +313,7 @@ class PlayerServiceTest {
 
         assertSame(playerDto, subject.castSpell(playerDto, "RETURN", "Dewhurst"));
 
-        verify(playerDto.getLocation()).setEntranceName(null);
+        verify(playerDto.getLocation()).setEntranceName(Town.DEWHURST.getEntranceName());
         verify(playerDto.getLocation()).setMapName(Town.DEWHURST.getMapName());
         verify(playerDto.getLocation()).setRowIndex(Town.DEWHURST.getRowIndex());
         verify(playerDto.getLocation()).setColumnIndex(Town.DEWHURST.getColumnIndex());
