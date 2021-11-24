@@ -35,10 +35,10 @@ public class PlayerController {
     }
 
     @PostMapping(value = "/login")
-    public ResponseEntity<Integer> login(@RequestParam String username, @RequestParam String password) {
+    public ResponseEntity<Integer> login(@RequestBody PlayerDto player) {
         ResponseEntity<Integer> response;
         try {
-            int playerId = playerService.login(username, password);
+            int playerId = playerService.login(player.getUsername(), player.getPassword());
             response = new ResponseEntity<>(playerId, HttpStatus.OK);
         } catch (BadCredentialsException ex) {
             response = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);

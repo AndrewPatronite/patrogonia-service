@@ -46,7 +46,6 @@ public class PlayerAssembler {
         player.setId(playerDto.getId());
         player.setName(playerDto.getName());
         player.setUsername(playerDto.getUsername());
-        //TODO encrypt!
         player.setPassword(playerDto.getPassword());
         setStats(player, playerDto, levelStats);
         setLocation(player, playerDto);
@@ -61,7 +60,6 @@ public class PlayerAssembler {
             player.setUsername(updatedPlayerDto.getUsername());
         }
         if (updatedPlayerDto.getPassword() != null) {
-            //TODO encrypt!
             player.setPassword(updatedPlayerDto.getPassword());
         }
         updateStats(player, updatedPlayerDto);

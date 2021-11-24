@@ -59,9 +59,7 @@ public class LocationDto implements Serializable {
         LocationDto that = (LocationDto) o;
         return rowIndex == that.rowIndex &&
                 columnIndex == that.columnIndex &&
-                Objects.equal(mapName, that.mapName) &&
-                Objects.equal(facing, that.facing) &&
-                Objects.equal(entranceName, that.entranceName);
+                Objects.equal(mapName, that.mapName);
     }
 
     @Override
