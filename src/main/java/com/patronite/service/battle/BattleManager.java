@@ -93,11 +93,14 @@ public class BattleManager {
     }
 
     public void joinBattle(StatsDto player, UUID battleUuid) {
-        removePlayerFromBattle(player.getPlayerId());
         BattleDto battle = battles.get(battleUuid);
-        battle.addPlayer(player);
-        battle.addLogEntry(String.format("%s joins the battle!", player.getPlayerName()));
-        battleMessenger.publishBattleMessage(battle);
+        //TODO AP not sure why this would be null
+        if ( battle != null) {
+            removePlayerFromBattle(player.getPlayerId());
+            battle.addPlayer(player);
+            battle.addLogEntry(String.format("%s joins the battle!", player.getPlayerName()));
+            battleMessenger.publishBattleMessage(battle);
+        }
     }
 
     public void removePlayerFromBattle(int playerId) {

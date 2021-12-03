@@ -1,7 +1,6 @@
 package com.patronite.service.model;
 
 import javax.persistence.*;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -20,6 +19,8 @@ public class Player {
     private Stats stats;
     @ElementCollection
     private Set<String> visited;
+    @ElementCollection
+    private Set<String> tutorialLessons;
 
     public int getId() {
         return id;
@@ -75,5 +76,13 @@ public class Player {
 
     public void setVisited(Set<String> visited) {
         this.visited = visited;
+    }
+
+    public Set<String> getTutorialLessons() {
+        return tutorialLessons;
+    }
+
+    public void setTutorialLessons(Set<String> tutorialLessons) {
+        this.tutorialLessons = tutorialLessons;
     }
 }

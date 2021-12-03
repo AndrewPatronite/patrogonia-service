@@ -32,6 +32,7 @@ public class PlayerAssembler {
         setSpellDtos(playerDto, spells);
         playerDto.setLastUpdate(new Date());
         playerDto.setVisited(player.getVisited());
+        playerDto.setTutorialLessons(player.getTutorialLessons());
         return playerDto;
     }
 
@@ -52,7 +53,7 @@ public class PlayerAssembler {
         return player;
     }
 
-    public void updatePlayer(Player player, PlayerDto updatedPlayerDto) {
+    public void updatePlayer(Player player, PlayerDto updatedPlayerDto, boolean saveGame) {
         if (updatedPlayerDto.getName() != null) {
             player.setName(updatedPlayerDto.getName());
         }
@@ -62,8 +63,11 @@ public class PlayerAssembler {
         if (updatedPlayerDto.getPassword() != null) {
             player.setPassword(updatedPlayerDto.getPassword());
         }
+        if (updatedPlayerDto.getTutorialLessons() != null) {
+            player.setTutorialLessons(updatedPlayerDto.getTutorialLessons());
+        }
         updateStats(player, updatedPlayerDto);
-        updateLocation(player, updatedPlayerDto);
+        updateLocation(player, updatedPlayerDto, saveGame);
     }
 
     public static void updateStats(Stats stats, StatsDto statsDto) {
@@ -157,7 +161,7 @@ public class PlayerAssembler {
         }
     }
 
-    private static void updateLocation(Player player, PlayerDto playerDto) {
+    private static void updateLocation(Player player, PlayerDto playerDto, boolean saveGame) {
         LocationDto locationDto = playerDto.getLocation();
         if (locationDto != null) {
             Location location = player.getLocation();
@@ -168,7 +172,7 @@ public class PlayerAssembler {
             location.setMapName(locationDto.getMapName());
             location.setRowIndex(locationDto.getRowIndex());
             location.setColumnIndex(locationDto.getColumnIndex());
-            if (playerDto.isSaveGame()) {
+            if (saveGame) {
                 if (player.getVisited() == null) {
                     player.setVisited(new HashSet<>());
                 }

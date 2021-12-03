@@ -17,10 +17,10 @@ public class PlayerDto implements Serializable {
     private LocationDto location;
     private StatsDto stats;
     private String battleId;
-    private boolean saveGame;
     private List<SpellDto> spells = newArrayList();
     private Date lastUpdate = new Date();
     private Set<String> visited = new HashSet<>();
+    private Set<String> tutorialLessons = new HashSet<>();
 
     public int getId() {
         return id;
@@ -78,14 +78,6 @@ public class PlayerDto implements Serializable {
         this.battleId = battleId;
     }
 
-    public boolean isSaveGame() {
-        return saveGame;
-    }
-
-    public void setSaveGame(boolean saveGame) {
-        this.saveGame = saveGame;
-    }
-
     public List<SpellDto> getSpells() {
         return spells;
     }
@@ -110,6 +102,14 @@ public class PlayerDto implements Serializable {
         this.visited = visited;
     }
 
+    public Set<String> getTutorialLessons() {
+        return tutorialLessons;
+    }
+
+    public void setTutorialLessons(Set<String> tutorialLessons) {
+        this.tutorialLessons = tutorialLessons;
+    }
+
     @Override
     public String toString() {
         return "PlayerDto{" +
@@ -119,10 +119,10 @@ public class PlayerDto implements Serializable {
                 ", location=" + location +
                 ", stats=" + stats +
                 ", battleId='" + battleId + '\'' +
-                ", saveGame=" + saveGame +
                 ", spells=" + spells +
                 ", lastUpdate=" + lastUpdate +
                 ", visited=" + visited +
+                ", tutorialLessons=" + tutorialLessons +
                 '}';
     }
 }

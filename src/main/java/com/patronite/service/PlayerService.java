@@ -72,15 +72,15 @@ public class PlayerService {
         return playerAssembler.dto(player, spells, xpTillNextLevel);
     }
 
-    public PlayerDto update(PlayerDto updatedPlayerDto) {
+    public PlayerDto update(PlayerDto updatedPlayerDto, boolean saveGame) {
         Player player = playerRepository.getOne(updatedPlayerDto.getId());
-        if (updatedPlayerDto.isSaveGame()) {
+        if (saveGame) {
             saveManager.save(updatedPlayerDto);
         } else {
             if (Arrays.stream(Town.values())
                     .anyMatch(town -> town.name().equalsIgnoreCase(updatedPlayerDto.getLocation().getMapName()))) {
                 //Player in town
-            } else {
+            } else if (updatedPlayerDto.getBattleId() == null) {
                 battleManager.findBattleInProgressAtLocation(updatedPlayerDto.getLocation())
                         .ifPresentOrElse(battle -> {
                                     battleManager.joinBattle(updatedPlayerDto.getStats(), battle.getId());
@@ -90,7 +90,7 @@ public class PlayerService {
                                         .ifPresent(battle -> updatedPlayerDto.setBattleId(battle.getId().toString())));
             }
         }
-        playerAssembler.updatePlayer(player, updatedPlayerDto);
+        playerAssembler.updatePlayer(player, updatedPlayerDto, saveGame);
         playerRepository.save(player);
         int playerLevel = player.getStats().getLevel();
         List<Spell> spells = levelManager.getSpells(playerLevel);
@@ -154,7 +154,7 @@ public class PlayerService {
                                         location.setMapName(targetId);
                                         location.setRowIndex(destination.getRowIndex());
                                         location.setColumnIndex(destination.getColumnIndex());
-                                        playerAssembler.updatePlayer(player, playerDto);
+                                        playerAssembler.updatePlayer(player, playerDto, false);
                                         playerRepository.save(player);
                                         playerStats.setMp(mp - OUTSIDE.getMp());
                                     } else {
@@ -171,7 +171,7 @@ public class PlayerService {
                                         location.setRowIndex(town.getRowIndex());
                                         location.setColumnIndex(town.getColumnIndex());
                                         location.setFacing(town.getTownCenterDirection());
-                                        playerAssembler.updatePlayer(player, playerDto);
+                                        playerAssembler.updatePlayer(player, playerDto, true);
                                         saveManager.save(playerDto);
                                         playerRepository.save(player);
                                     } else {

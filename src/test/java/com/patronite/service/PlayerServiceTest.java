@@ -120,18 +120,18 @@ class PlayerServiceTest {
     void updateSavingGame() {
         PlayerDto updatedPlayerDto = mock(PlayerDto.class);
         List<Spell> spells = singletonList(Spell.HEAL);
+        boolean saveGame = true;
         when(updatedPlayerDto.getId()).thenReturn(PLAYER_ID);
-        when(updatedPlayerDto.isSaveGame()).thenReturn(true);
         when(levelManager.getSpells(PLAYER_LEVEL)).thenReturn(spells);
         StatsDto playerStatsDto = mock(StatsDto.class);
         when(playerStatsDto.getXp()).thenReturn(PLAYER_XP);
         when(updatedPlayerDto.getStats()).thenReturn(playerStatsDto);
         when(levelManager.getXpTillNextLevel(PLAYER_LEVEL, PLAYER_XP)).thenReturn(15);
 
-        assertSame(updatedPlayerDto, subject.update(updatedPlayerDto));
+        assertSame(updatedPlayerDto, subject.update(updatedPlayerDto, saveGame));
 
         verify(saveManager).save(updatedPlayerDto);
-        verify(playerAssembler).updatePlayer(player, updatedPlayerDto);
+        verify(playerAssembler).updatePlayer(player, updatedPlayerDto, saveGame);
         verify(playerRepository).save(player);
         verify(playerAssembler).setSpellDtos(updatedPlayerDto, spells);
         verify(playerStatsDto).setXpTillNextLevel(15);
@@ -146,6 +146,7 @@ class PlayerServiceTest {
         BattleDto battle = mock(BattleDto.class);
         UUID battleId = UUID.randomUUID();
         List<Spell> spells = singletonList(Spell.HEAL);
+        boolean saveGame = false;
         when(updatedPlayerDto.getId()).thenReturn(PLAYER_ID);
         when(battle.getId()).thenReturn(battleId);
         when(updatedPlayerDto.getLocation()).thenReturn(location);
@@ -156,13 +157,13 @@ class PlayerServiceTest {
         when(updatedPlayerDto.getStats()).thenReturn(playerStatsDto);
         when(levelManager.getXpTillNextLevel(PLAYER_LEVEL, PLAYER_XP)).thenReturn(15);
 
-        assertSame(updatedPlayerDto, subject.update(updatedPlayerDto));
+        assertSame(updatedPlayerDto, subject.update(updatedPlayerDto, saveGame));
 
         verify(saveManager, never()).save(updatedPlayerDto);
         verify(battleManager, never()).spawnOrDontSpawnBattle(updatedPlayerDto, player.getLocation());
         verify(battleManager).joinBattle(updatedPlayerDto.getStats(), battle.getId());
         verify(updatedPlayerDto).setBattleId(battleId.toString());
-        verify(playerAssembler).updatePlayer(player, updatedPlayerDto);
+        verify(playerAssembler).updatePlayer(player, updatedPlayerDto, saveGame);
         verify(playerRepository).save(player);
         verify(playerAssembler).setSpellDtos(updatedPlayerDto, spells);
         verify(playerStatsDto).setXpTillNextLevel(15);
@@ -177,6 +178,7 @@ class PlayerServiceTest {
         BattleDto battle = mock(BattleDto.class);
         UUID battleId = UUID.randomUUID();
         List<Spell> spells = singletonList(Spell.HEAL);
+        boolean saveGame = false;
         when(updatedPlayerDto.getId()).thenReturn(PLAYER_ID);
         when(battle.getId()).thenReturn(battleId);
         when(updatedPlayerDto.getLocation()).thenReturn(location);
@@ -188,11 +190,11 @@ class PlayerServiceTest {
         when(updatedPlayerDto.getStats()).thenReturn(playerStatsDto);
         when(levelManager.getXpTillNextLevel(PLAYER_LEVEL, PLAYER_XP)).thenReturn(15);
 
-        assertSame(updatedPlayerDto, subject.update(updatedPlayerDto));
+        assertSame(updatedPlayerDto, subject.update(updatedPlayerDto, saveGame));
 
         verify(saveManager, never()).save(updatedPlayerDto);
         verify(updatedPlayerDto).setBattleId(battleId.toString());
-        verify(playerAssembler).updatePlayer(player, updatedPlayerDto);
+        verify(playerAssembler).updatePlayer(player, updatedPlayerDto, saveGame);
         verify(playerRepository).save(player);
         verify(playerAssembler).setSpellDtos(updatedPlayerDto, spells);
         verify(playerStatsDto).setXpTillNextLevel(15);
@@ -283,6 +285,7 @@ class PlayerServiceTest {
     @Test
     void castOutside() {
         PlayerDto playerDto = getSpellCaster();
+        boolean saveGame = false;
         when(playerDto.getLocation().getMapName()).thenReturn("Lava Grotto");
         when(playerRepository.getOne(PLAYER_ID)).thenReturn(player);
 
@@ -292,7 +295,7 @@ class PlayerServiceTest {
         verify(playerDto.getLocation()).setMapName("Atoris");
         verify(playerDto.getLocation()).setRowIndex(OutsideDestination.ATORIS.getRowIndex());
         verify(playerDto.getLocation()).setColumnIndex(OutsideDestination.ATORIS.getColumnIndex());
-        verify(playerAssembler).updatePlayer(player, playerDto);
+        verify(playerAssembler).updatePlayer(player, playerDto, saveGame);
         verify(playerRepository).save(player);
         verify(playerDto.getStats()).setMp(playerDto.getStats().getMp() - Spell.OUTSIDE.getMp());
     }
@@ -309,6 +312,7 @@ class PlayerServiceTest {
     @Test
     void castReturn() {
         PlayerDto playerDto = getSpellCaster();
+        boolean saveGame = true;
         when(playerRepository.getOne(PLAYER_ID)).thenReturn(player);
 
         assertSame(playerDto, subject.castSpell(playerDto, "RETURN", "Dewhurst"));
@@ -317,7 +321,7 @@ class PlayerServiceTest {
         verify(playerDto.getLocation()).setMapName(Town.DEWHURST.getMapName());
         verify(playerDto.getLocation()).setRowIndex(Town.DEWHURST.getRowIndex());
         verify(playerDto.getLocation()).setColumnIndex(Town.DEWHURST.getColumnIndex());
-        verify(playerAssembler).updatePlayer(player, playerDto);
+        verify(playerAssembler).updatePlayer(player, playerDto, saveGame);
         verify(playerRepository).save(player);
         verify(playerDto.getStats()).setMp(playerDto.getStats().getMp() - Spell.RETURN.getMp());
     }

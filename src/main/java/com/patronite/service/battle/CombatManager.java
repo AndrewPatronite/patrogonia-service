@@ -91,7 +91,7 @@ public class CombatManager {
                                 castSpellOnEnemy(spellName, battle, playerStats, spell, targetedOrFirstEnemy));
             } else {
                 StatsDto playerTarget = battle.getPlayerStats().get(Integer.parseInt(targetId));
-                int playerHp = playerTarget.getHp();
+                int playerHp = playerTarget.getHp();//TODO AP verify NPE after deceased peer has loaded game.
                 int playerHpTotal = playerTarget.getHpTotal();
                 int restoredHp = playerHp + spell.getEffect() > playerHpTotal ?
                         playerHpTotal - playerHp :

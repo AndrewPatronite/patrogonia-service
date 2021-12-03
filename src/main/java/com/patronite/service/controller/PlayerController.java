@@ -72,11 +72,11 @@ public class PlayerController {
         return response;
     }
 
-    @PutMapping(value = "/update")
-    public ResponseEntity<PlayerDto> update(@RequestBody PlayerDto player) {
+    @PutMapping(value = "/update/{saveGame}")
+    public ResponseEntity<PlayerDto> update(@RequestBody PlayerDto player,  @PathVariable boolean saveGame) {
         ResponseEntity<PlayerDto> response;
         try {
-            response = new ResponseEntity<>(playerService.update(player), HttpStatus.OK);
+            response = new ResponseEntity<>(playerService.update(player, saveGame), HttpStatus.OK);
         } catch (Exception ex) {
             response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
