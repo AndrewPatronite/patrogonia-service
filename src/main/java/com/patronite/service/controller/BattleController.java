@@ -2,15 +2,18 @@ package com.patronite.service.controller;
 
 import com.patronite.service.BattleService;
 import com.patronite.service.dto.BattleDto;
-import com.patronite.service.dto.player.StatsDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping(value = "/battle")
 public class BattleController {
     private final BattleService battleService;
+    private final Logger logger = Logger.getLogger("BattleController");
 
     public BattleController(BattleService battleService) {
         this.battleService = battleService;
@@ -23,6 +26,7 @@ public class BattleController {
             response = new ResponseEntity<>(battleService.getBattle(battleId), HttpStatus.OK);
         } catch (Exception ex) {
             response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.warning(Arrays.toString(ex.getStackTrace()));
         }
         return response;
     }
@@ -35,6 +39,7 @@ public class BattleController {
             response = new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception ex) {
             response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.warning(Arrays.toString(ex.getStackTrace()));
         }
         return response;
     }

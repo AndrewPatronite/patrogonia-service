@@ -7,12 +7,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping(value = "/player")
 public class PlayerController {
     private final PlayerService playerService;
+    private final Logger logger = Logger.getLogger("PlayerController");
 
     public PlayerController(PlayerService playerService) {
         this.playerService = playerService;
@@ -27,9 +30,11 @@ public class PlayerController {
         }
         catch (IllegalArgumentException ex) {
             response = new ResponseEntity<>(HttpStatus.CONFLICT);
+            logger.warning(Arrays.toString(ex.getStackTrace()));
         }
         catch (Exception ex) {
             response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.warning(Arrays.toString(ex.getStackTrace()));
         }
         return response;
     }
@@ -42,8 +47,10 @@ public class PlayerController {
             response = new ResponseEntity<>(playerId, HttpStatus.OK);
         } catch (BadCredentialsException ex) {
             response = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            logger.warning(Arrays.toString(ex.getStackTrace()));
         } catch (Exception ex) {
             response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.warning(Arrays.toString(ex.getStackTrace()));
         }
         return response;
     }
@@ -56,6 +63,7 @@ public class PlayerController {
             response = new ResponseEntity<>(players, HttpStatus.OK);
         } catch (Exception ex) {
             response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.warning(Arrays.toString(ex.getStackTrace()));
         }
         return response;
     }
@@ -68,6 +76,7 @@ public class PlayerController {
             response = new ResponseEntity<>(player, HttpStatus.OK);
         } catch (Exception ex) {
             response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.warning(Arrays.toString(ex.getStackTrace()));
         }
         return response;
     }
@@ -79,6 +88,7 @@ public class PlayerController {
             response = new ResponseEntity<>(playerService.update(player, saveGame), HttpStatus.OK);
         } catch (Exception ex) {
             response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.warning(Arrays.toString(ex.getStackTrace()));
         }
         return response;
     }
@@ -91,6 +101,7 @@ public class PlayerController {
             response = new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception ex) {
             response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.warning(Arrays.toString(ex.getStackTrace()));
         }
         return response;
     }
@@ -102,6 +113,7 @@ public class PlayerController {
             response = new ResponseEntity<>(playerService.castSpell(player, spellName, targetId), HttpStatus.OK);
         } catch (Exception ex) {
             response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.warning(Arrays.toString(ex.getStackTrace()));
         }
         return response;
     }
