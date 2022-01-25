@@ -3,10 +3,7 @@ package com.patronite.service.configuration;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.*;
 
 @Configuration
 @EnableWebMvc
@@ -30,11 +27,11 @@ public class WebConfig extends WebMvcAutoConfiguration implements WebMvcConfigur
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/{spring:\\w+}")
+        registry.addViewController("/login")
                 .setViewName("forward:/");
-        registry.addViewController("/**/{spring:\\w+}")
+        registry.addViewController("/field/*")
                 .setViewName("forward:/");
-        registry.addViewController("/{spring:\\w+}/**{spring:?!(\\.js|\\.css)$}")
+        registry.addViewController("/battle/*")
                 .setViewName("forward:/");
     }
 }
