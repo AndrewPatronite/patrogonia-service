@@ -18,13 +18,13 @@ import java.util.stream.Collectors;
 import static com.google.common.collect.Lists.newArrayList;
 
 public class BattleDto implements Serializable {
-    private static final long serialVersionUID = -7924483845986265569L;
+    private static final long serialVersionUID = 5012911936710523536L;
     private final UUID id = UUID.randomUUID();
-    private List<EnemyDto> enemies;
-    private Map<Integer, StatsDto> playerStats = new ConcurrentHashMap<>();
-    private List<LogEntry> log = newArrayList();
-    private Map<Integer, PlayerAction> roundPlayerActions = new ConcurrentHashMap<>();
-    private Map<Integer, List<RewardDto>> playerRewards = new ConcurrentHashMap<>();
+    private final List<EnemyDto> enemies;
+    private final Map<Integer, StatsDto> playerStats = new ConcurrentHashMap<>();
+    private final List<LogEntry> log = newArrayList();
+    private final Map<Integer, PlayerAction> roundPlayerActions = new ConcurrentHashMap<>();
+    private final Map<Integer, List<RewardDto>> playerRewards = new ConcurrentHashMap<>();
     private final LocationDto location;
     private BattleStatus status = BattleStatus.IN_PROGRESS;
     private int round = 0;

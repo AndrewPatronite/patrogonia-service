@@ -45,7 +45,7 @@ public class SpoilsManager {
             battle.addLogEntry(String.format("%s receives %s experience and %s gold.",
                     player.getPlayerName(), experience.get(), gold.get()), player.getPlayerId());
         } else {
-            //TODO add items
+            //TODO AP add items
 //            player.addItems(items);
             battle.addLogEntry(String.format("%s receives %s experience, %s gold, and %s.",
                     player.getPlayerName(), experience.get(), gold.get(),
@@ -67,7 +67,7 @@ public class SpoilsManager {
         for (int i = 0; i < items.size(); i++) {
             StatsDto player = players.get(i / players.size());
             ItemDto item = items.get(i);
-            //TODO add items
+            //TODO AP add items
 //            player.addItem(item);
             battle.addLogEntry(String.format("%s receives %s since %s is dead.", player.getPlayerName(), item.getName(), playerName));
         }

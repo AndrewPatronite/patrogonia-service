@@ -1,6 +1,7 @@
 package com.patronite.service.configuration;
 
 import com.patronite.service.message.BattleMessenger;
+import com.patronite.service.message.NpcMessenger;
 import com.patronite.service.message.PlayerMessenger;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -14,11 +15,13 @@ public class WebSocketConfig implements WebSocketConfigurer {
 	private final Environment environment;
 	private final PlayerMessenger playerMessenger;
 	private final BattleMessenger battleMessenger;
+	private final NpcMessenger npcMessenger;
 
-	public WebSocketConfig(Environment environment, PlayerMessenger playerMessenger, BattleMessenger battleMessenger) {
+	public WebSocketConfig(Environment environment, PlayerMessenger playerMessenger, BattleMessenger battleMessenger, NpcMessenger npcMessenger) {
 		this.environment = environment;
 		this.playerMessenger = playerMessenger;
 		this.battleMessenger = battleMessenger;
+		this.npcMessenger = npcMessenger;
 	}
 
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
@@ -26,6 +29,8 @@ public class WebSocketConfig implements WebSocketConfigurer {
 		registry.addHandler(playerMessenger, "/players")
 				.setAllowedOrigins(allowedOrigins);
 		registry.addHandler(battleMessenger, "/battles")
+				.setAllowedOrigins(allowedOrigins);
+		registry.addHandler(npcMessenger, "/npcs")
 				.setAllowedOrigins(allowedOrigins);
 	}
 }

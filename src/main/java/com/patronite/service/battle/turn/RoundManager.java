@@ -4,7 +4,6 @@ import com.patronite.service.battle.BattleStatus;
 import com.patronite.service.battle.CombatManager;
 import com.patronite.service.dto.BattleDto;
 import com.patronite.service.dto.player.StatsDto;
-import com.patronite.service.message.BattleMessenger;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -15,11 +14,9 @@ import static com.google.common.collect.Lists.newArrayList;
 
 @Component
 public class RoundManager {
-    private final BattleMessenger battleMessenger;
     private final CombatManager combatManager;
 
-    public RoundManager(BattleMessenger battleMessenger, CombatManager combatManager) {
-        this.battleMessenger = battleMessenger;
+    public RoundManager(CombatManager combatManager) {
         this.combatManager = combatManager;
     }
 

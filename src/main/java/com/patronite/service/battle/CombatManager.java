@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Component
 public class CombatManager {
@@ -34,7 +33,7 @@ public class CombatManager {
                     battle.addLogEntry(String.format("%s blocks.", playerStats.getPlayerName()));
                     break;
                 case RUN:
-                    //TODO let players run based on their agility relative to enemies, boss fights, etc.
+                    //TODO AP let players run based on their agility relative to enemies, boss fights, etc.
                     battle.addLogEntry(String.format("%s tries to run but there is no escape.", playerStats.getPlayerName()));
                     break;
                 default:
@@ -84,7 +83,7 @@ public class CombatManager {
                     playerStats.getPlayerName(), spellName));
         } else {
             playerStats.setMp(playerStats.getMp() - spell.getMp());
-            //TODO generalize once more spells exist:
+            //TODO AP generalize once more spells exist:
             if (spell.getBattleTarget() == BattleTarget.ENEMY) {
                 getTargetedOrFirstEnemy(targetId, battle)
                         .ifPresent(targetedOrFirstEnemy ->

@@ -99,7 +99,7 @@ public class PlayerService {
                 levelManager.getXpTillNextLevel(playerLevel, updatedPlayerDto.getStats().getXp()));
         updatedPlayerDto.setLastUpdate(new Date());
         playerMessenger.publishPlayerMessage(updatedPlayerDto);
-        logger.info("Updated player {}", updatedPlayerDto);
+        logger.debug("Updated player {}", updatedPlayerDto);
         return updatedPlayerDto;
     }
 
@@ -154,6 +154,7 @@ public class PlayerService {
                                         location.setMapName(targetId);
                                         location.setRowIndex(destination.getRowIndex());
                                         location.setColumnIndex(destination.getColumnIndex());
+                                        location.setFacing("down");
                                         playerAssembler.updatePlayer(player, playerDto, false);
                                         playerRepository.save(player);
                                         playerStats.setMp(mp - OUTSIDE.getMp());
