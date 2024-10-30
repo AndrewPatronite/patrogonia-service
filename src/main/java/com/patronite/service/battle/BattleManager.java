@@ -12,7 +12,6 @@ import com.patronite.service.dto.BattleDto;
 import com.patronite.service.dto.player.PlayerDto;
 import com.patronite.service.dto.player.StatsDto;
 import com.patronite.service.message.BattleMessenger;
-import com.patronite.service.spell.Spell;
 import com.patronite.service.stats.StatsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,8 +93,7 @@ public class BattleManager {
 
     public void joinBattle(StatsDto player, UUID battleUuid) {
         BattleDto battle = battles.get(battleUuid);
-        //TODO AP not sure why this would be null
-        if ( battle != null) {
+        if (battle != null && !battle.getPlayerStats().containsKey(player.getPlayerId())) {
             removePlayerFromBattle(player.getPlayerId());
             battle.addPlayer(player);
             battle.addLogEntry(String.format("%s joins the battle!", player.getPlayerName()));

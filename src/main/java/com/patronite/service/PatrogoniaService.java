@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-//TODO enable security
+//TODO AP enable security
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
 @EnableJpaAuditing
 public class PatrogoniaService extends SpringBootServletInitializer {

@@ -20,7 +20,9 @@ public abstract class AbstractMessenger extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         subscriptions.forEach(subscription -> {
             try {
-                subscription.sendMessage(message);
+                synchronized (subscription) {
+                    subscription.sendMessage(message);
+                }
             } catch (IOException e) {
                 logger.error("An error occurred while sending message ", e);
             }

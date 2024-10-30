@@ -8,20 +8,21 @@ import com.patronite.service.dto.player.PlayerDto;
 import com.patronite.service.model.Location;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.google.common.collect.Lists.newArrayList;
 
 @Component
 public class BattleGenerator {
     private static final int BATTLE_PERCENTAGE_UPPER_THRESHOLD = 100;
-    private static final int BATTLE_PERCENTAGE_LOWER_THRESHOLD = 10;
+    private static final int BATTLE_PERCENTAGE_LOWER_THRESHOLD = 25;
+    private static final int MIN_FREE_MOVES = 7;
     private static final int MIN_ENEMIES = 1;
     private static final int MAX_ENEMIES = 5;
     private final EnemyManager enemyManager;
     private final Random spawnRandomizer = new Random();
+    private final Map<Integer, Integer> movesSinceLastBattle = new ConcurrentHashMap<>();
 
     public BattleGenerator(EnemyManager enemyManager) {
         this.enemyManager = enemyManager;
@@ -31,7 +32,7 @@ public class BattleGenerator {
         Optional<BattleDto> potentialBattle = Optional.empty();
         LocationDto newLocation = playerDto.getLocation();
 
-        if (isDifferentLocationInTheSameMap(lastLocation, newLocation) && shouldSpawn()) {
+        if (isDifferentLocationInTheSameMap(lastLocation, newLocation) && shouldSpawn(playerDto)) {
             BattleDto battle = new BattleDto(generateEnemies(newLocation.getMapName()), playerDto);
             potentialBattle = Optional.of(battle);
         }
@@ -44,8 +45,12 @@ public class BattleGenerator {
                         lastLocation.getColumnIndex() != newLocation.getColumnIndex());
     }
 
-    private boolean shouldSpawn() {
-        return spawnRandomizer.nextInt(BATTLE_PERCENTAGE_UPPER_THRESHOLD + 1) < BATTLE_PERCENTAGE_LOWER_THRESHOLD;
+    private boolean shouldSpawn(PlayerDto playerDto) {
+        int playerMovesSinceLastBattle = movesSinceLastBattle.getOrDefault(playerDto.getId(), 0) + 1;
+        boolean doSpawn = playerMovesSinceLastBattle > MIN_FREE_MOVES &&
+                spawnRandomizer.nextInt(BATTLE_PERCENTAGE_UPPER_THRESHOLD + 1) < BATTLE_PERCENTAGE_LOWER_THRESHOLD;
+        movesSinceLastBattle.put(playerDto.getId(), doSpawn ? 0 : playerMovesSinceLastBattle);
+        return doSpawn;
     }
 
     private List<EnemyDto> generateEnemies(String mapName) {

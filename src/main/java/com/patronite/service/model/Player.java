@@ -12,7 +12,7 @@ public class Player {
     @Column private String name;
     @Column private String username;
     @Column private String password;
-    //TODO add foreign key constraint:
+    //TODO AP add foreign key constraint:
     @OneToOne(mappedBy = "player", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Location location;
     @OneToOne(mappedBy = "player", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
