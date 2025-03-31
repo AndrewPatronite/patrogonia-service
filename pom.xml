@@ -20,7 +20,7 @@
         <com.google.guava.version>29.0-jre</com.google.guava.version>
         <maven-antrun-plugin.version>3.0.0</maven-antrun-plugin.version>
         <org.springframework.boot.version>2.2.6.RELEASE</org.springframework.boot.version>
-        <mysql-connector-java.version>8.0.19</mysql-connector-java.version>
+        <mysql-connector-java.version>8.0.28</mysql-connector-java.version>
         <commons-dbcp.version>1.4</commons-dbcp.version>
         <org.junit.jupiter.version>5.7.0-M1</org.junit.jupiter.version>
         <org.mockito.version>3.3.3</org.mockito.version>
