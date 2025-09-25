@@ -1,16 +1,14 @@
 package com.patronite.service.assembler;
 
 import com.patronite.service.battle.BattleTarget;
+import com.patronite.service.dto.item.ItemDto;
 import com.patronite.service.dto.player.LocationDto;
 import com.patronite.service.dto.player.PlayerDto;
 import com.patronite.service.dto.player.SpellDto;
 import com.patronite.service.dto.player.StatsDto;
 import com.patronite.service.level.Level;
 import com.patronite.service.location.Town;
-import com.patronite.service.model.Location;
-import com.patronite.service.model.Player;
-import com.patronite.service.model.Save;
-import com.patronite.service.model.Stats;
+import com.patronite.service.model.*;
 import com.patronite.service.spell.Spell;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +31,18 @@ public class PlayerAssembler {
         playerDto.setLastUpdate(new Date());
         playerDto.setVisited(player.getVisited());
         playerDto.setTutorialLessons(player.getTutorialLessons());
+        updateDtoInventory(player, playerDto);
         return playerDto;
+    }
+
+    public void updateDtoInventory(Player player, PlayerDto playerDto) {
+        playerDto.setInventory(player.getInventory().stream().map(item -> {
+            ItemDto itemDto = new ItemDto();
+            itemDto.setId(item.getId());
+            itemDto.setItemDetails(item.getItemDetails());
+            itemDto.setEquipped(item.isEquipped());
+            return itemDto;
+        }).collect(Collectors.toList()));
     }
 
     public void setSpellDtos(PlayerDto playerDto, List<Spell> spells) {
@@ -53,7 +62,7 @@ public class PlayerAssembler {
         return player;
     }
 
-    public void updatePlayer(Player player, PlayerDto updatedPlayerDto, boolean saveGame) {
+    public static void updatePlayer(Player player, PlayerDto updatedPlayerDto, boolean saveGame) {
         if (updatedPlayerDto.getName() != null) {
             player.setName(updatedPlayerDto.getName());
         }
@@ -66,13 +75,18 @@ public class PlayerAssembler {
         if (updatedPlayerDto.getTutorialLessons() != null) {
             player.setTutorialLessons(updatedPlayerDto.getTutorialLessons());
         }
-        updateStats(player, updatedPlayerDto);
+        updateStats(player, updatedPlayerDto, saveGame);
         updateLocation(player, updatedPlayerDto, saveGame);
+        updatePlayerInventory(player, updatedPlayerDto);
     }
 
-    public static void updateStats(Stats stats, StatsDto statsDto) {
+    public static void updateStats(Stats stats, StatsDto statsDto, boolean restoreHpMp) {
         stats.setLevel(statsDto.getLevel());
         stats.setXp(statsDto.getXp());
+        if (restoreHpMp) {
+            statsDto.setHp(statsDto.getHpTotal());
+            statsDto.setMp(statsDto.getMpTotal());
+        }
         stats.setHp(statsDto.getHp());
         stats.setHpTotal(statsDto.getHpTotal());
         stats.setMp(statsDto.getMp());
@@ -136,7 +150,7 @@ public class PlayerAssembler {
             Stats stats = new Stats();
             player.setStats(stats);
             stats.setPlayer(player);
-            updateStats(player, playerDto);
+            updateStats(player, playerDto, false);
         } else {
             Stats stats = player.getStats() != null ?  player.getStats() : new Stats();
             stats.setLevel(levelStats.getLevel());
@@ -153,11 +167,11 @@ public class PlayerAssembler {
         }
     }
 
-    private static void updateStats(Player player, PlayerDto playerDto) {
+    private static void updateStats(Player player, PlayerDto playerDto, boolean restoreHpMp) {
         StatsDto statsDto = playerDto.getStats();
         if (statsDto != null) {
             Stats stats = player.getStats();
-            updateStats(stats, statsDto);
+            updateStats(stats, statsDto, restoreHpMp);
         }
     }
 
@@ -185,10 +199,60 @@ public class PlayerAssembler {
         }
     }
 
-    public static Save save(PlayerDto updatedPlayerDto) {
-        Save save = new Save();
-        StatsDto stats = updatedPlayerDto.getStats();
-        save.setPlayerId(updatedPlayerDto.getId());
+    private static void updatePlayerInventory(Player player, PlayerDto updatedPlayerDto) {
+        Map<Integer, Item> playerItems = player.getInventory().stream()
+                .collect(Collectors.toMap(Item::getId, item -> item));
+        List<Item> newItems = new ArrayList<>();
+        Set<Integer> updatedItemIds = new HashSet<>();
+        updatedPlayerDto.getInventory().forEach(itemDto -> {
+            updatedItemIds.add(itemDto.getId());
+            Item playerItem = playerItems.get(itemDto.getId());
+            if (playerItem != null) {
+                playerItem.setEquipped(itemDto.isEquipped());
+            } else {
+                //TODO AP ensure hit from picking up item or remove
+                Item newItem = new Item();
+                newItem.setId(itemDto.getId());
+                newItem.setPlayer(player);
+                newItem.setItemDetails(itemDto.getItemDetails());
+                newItem.setEquipped(itemDto.isEquipped());
+                newItems.add(newItem);
+            }
+        });
+        List<Item> itemsToRemove = playerItems.values().stream()
+                .filter(item -> !updatedItemIds.contains(item.getId())).collect(Collectors.toList());
+        player.getInventory().removeAll(itemsToRemove);
+        player.getInventory().addAll(newItems);
+    }
+
+    private static void updateSaveInventory(Save save, Player player) {
+        Map<Integer, Item> previouslySavedItems = save.getInventory().stream()
+                .collect(Collectors.toMap(Item::getSaveOfItemId, item -> item));
+        List<Item> newItemsToSave = new ArrayList<>();
+        Set<Integer> updatedItemIds = new HashSet<>();
+        player.getInventory().forEach(item -> {
+            updatedItemIds.add(item.getId());
+            Item previouslySavedItem = previouslySavedItems.get(item.getId());
+            if (previouslySavedItem != null) {
+                previouslySavedItem.setEquipped(item.isEquipped());
+            } else {
+                Item newlySavedItem = new Item();
+                newlySavedItem.setSave(save);
+                newlySavedItem.setItemDetails(item.getItemDetails());
+                newlySavedItem.setEquipped(item.isEquipped());
+                newlySavedItem.setSaveOfItemId(item.getId());
+                newItemsToSave.add(newlySavedItem);
+            }
+        });
+        List<Item> itemsToRemove = previouslySavedItems.values().stream()
+                .filter(item -> !updatedItemIds.contains(item.getSaveOfItemId())).collect(Collectors.toList());
+        save.getInventory().removeAll(itemsToRemove);
+        save.getInventory().addAll(newItemsToSave);
+    }
+
+    public static Save save(Save save, Player player) {
+        Stats stats = player.getStats();
+        save.setPlayerId(player.getId());
         save.setLevel(stats.getLevel());
         save.setXp(stats.getXp());
         save.setHp(stats.getHpTotal());
@@ -201,10 +265,11 @@ public class PlayerAssembler {
         save.setDefense(stats.getDefense());
         save.setAgility(stats.getAgility());
         save.setGold(stats.getGold());
-        LocationDto location = updatedPlayerDto.getLocation();
+        Location location = player.getLocation();
         save.setMapName(location.getMapName());
         save.setRowIndex(location.getRowIndex());
         save.setColumnIndex(location.getColumnIndex());
+        updateSaveInventory(save, player);
         return save;
     }
 
@@ -224,5 +289,14 @@ public class PlayerAssembler {
         location.setMapName(save.getMapName());
         location.setRowIndex(save.getRowIndex());
         location.setColumnIndex(save.getColumnIndex());
+        player.getInventory().clear();
+        player.getInventory().addAll(
+        save.getInventory().stream().map(savedItem -> {
+            Item item = new Item();
+            item.setPlayer(player);
+            item.setItemDetails(savedItem.getItemDetails());
+            item.setEquipped(savedItem.isEquipped());
+            return item;
+        }).collect(Collectors.toList()));
     }
 }

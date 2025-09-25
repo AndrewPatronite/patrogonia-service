@@ -52,7 +52,7 @@ public class PlayerService {
         }
         Level levelStats = levelManager.getLevel(1);
         Player player = playerRepository.save(playerAssembler.entity(playerDto, levelStats));
-        saveManager.save(getPlayer(player.getId()));
+        saveManager.create(player);
         return player.getId();
     }
 
@@ -74,24 +74,23 @@ public class PlayerService {
 
     public PlayerDto update(PlayerDto updatedPlayerDto, boolean saveGame) {
         Player player = playerRepository.getOne(updatedPlayerDto.getId());
-        if (saveGame) {
-            saveManager.save(updatedPlayerDto);
-        } else {
-            if (Arrays.stream(Town.values())
-                    .anyMatch(town -> town.name().equalsIgnoreCase(updatedPlayerDto.getLocation().getMapName()))) {
-                //Player in town
-            } else if (updatedPlayerDto.getBattleId() == null) {
-                battleManager.findBattleInProgressAtLocation(updatedPlayerDto.getLocation())
-                        .ifPresentOrElse(battle -> {
-                                    battleManager.joinBattle(updatedPlayerDto.getStats(), battle.getId());
-                                    updatedPlayerDto.setBattleId(battle.getId().toString());
-                                },
-                                () -> battleManager.spawnOrDontSpawnBattle(updatedPlayerDto, player.getLocation())
-                                        .ifPresent(battle -> updatedPlayerDto.setBattleId(battle.getId().toString())));
-            }
+        boolean playerInTown = Arrays.stream(Town.values())
+                .anyMatch(town -> town.name().equalsIgnoreCase(updatedPlayerDto.getLocation().getMapName()));
+        if (!playerInTown && updatedPlayerDto.getBattleId() == null) {
+            battleManager.findBattleInProgressAtLocation(updatedPlayerDto.getLocation())
+                    .ifPresentOrElse(battle -> {
+                                battleManager.joinBattle(updatedPlayerDto.getStats(), battle.getId());
+                                updatedPlayerDto.setBattleId(battle.getId().toString());
+                            },
+                            () -> battleManager.spawnOrDontSpawnBattle(updatedPlayerDto, player.getLocation())
+                                    .ifPresent(battle -> updatedPlayerDto.setBattleId(battle.getId().toString())));
         }
-        playerAssembler.updatePlayer(player, updatedPlayerDto, saveGame);
-        playerRepository.save(player);
+        if (saveGame) {
+            saveManager.save(player, updatedPlayerDto);
+        } else {
+            PlayerAssembler.updatePlayer(player, updatedPlayerDto, false);
+            playerRepository.save(player);
+        }
         int playerLevel = player.getStats().getLevel();
         List<Spell> spells = levelManager.getSpells(playerLevel);
         playerAssembler.setSpellDtos(updatedPlayerDto, spells);
@@ -155,7 +154,7 @@ public class PlayerService {
                                         location.setRowIndex(destination.getRowIndex());
                                         location.setColumnIndex(destination.getColumnIndex());
                                         location.setFacing("down");
-                                        playerAssembler.updatePlayer(player, playerDto, false);
+                                        PlayerAssembler.updatePlayer(player, playerDto, false);
                                         playerRepository.save(player);
                                         playerStats.setMp(mp - OUTSIDE.getMp());
                                     } else {
@@ -172,9 +171,7 @@ public class PlayerService {
                                         location.setRowIndex(town.getRowIndex());
                                         location.setColumnIndex(town.getColumnIndex());
                                         location.setFacing(town.getTownCenterDirection());
-                                        playerAssembler.updatePlayer(player, playerDto, true);
-                                        saveManager.save(playerDto);
-                                        playerRepository.save(player);
+                                        saveManager.save(player, playerDto);
                                     } else {
                                         throw new IllegalStateException(String.format("Not enough MP to cast %s", spell.getSpellName()));
                                     }

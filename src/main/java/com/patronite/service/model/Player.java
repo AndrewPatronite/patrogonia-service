@@ -1,6 +1,7 @@
 package com.patronite.service.model;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -21,6 +22,8 @@ public class Player {
     private Set<String> visited;
     @ElementCollection
     private Set<String> tutorialLessons;
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<Item> inventory;
 
     public int getId() {
         return id;
@@ -84,5 +87,13 @@ public class Player {
 
     public void setTutorialLessons(Set<String> tutorialLessons) {
         this.tutorialLessons = tutorialLessons;
+    }
+
+    public List<Item> getInventory() {
+        return inventory;
+    }
+
+    public void setInventory(List<Item> inventory) {
+        this.inventory = inventory;
     }
 }

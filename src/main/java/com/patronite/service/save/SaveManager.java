@@ -18,8 +18,15 @@ public class SaveManager {
         this.playerRepository = playerRepository;
     }
 
-    public void save(PlayerDto updatedPlayerDto) {
-        saveRepository.save(PlayerAssembler.save(updatedPlayerDto));
+    public void create(Player player) {
+        saveRepository.save(PlayerAssembler.save(new Save(), player));
+    }
+
+    public void save(Player player, PlayerDto updatedPlayerDto) {
+        PlayerAssembler.updatePlayer(player, updatedPlayerDto, true);
+        playerRepository.save(player);
+        Save save = saveRepository.getOne(player.getId());
+        saveRepository.save(PlayerAssembler.save(save, player));
     }
 
     public void loadLastSave(int playerId) {

@@ -111,7 +111,12 @@ public class PlayerController {
         ResponseEntity<PlayerDto> response;
         try {
             response = new ResponseEntity<>(playerService.castSpell(player, spellName, targetId), HttpStatus.OK);
-        } catch (Exception ex) {
+        }
+        catch (IllegalArgumentException ex) {
+            response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            logger.warning(ex.getMessage());
+        }
+        catch (Exception ex) {
             response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             logger.warning(Arrays.toString(ex.getStackTrace()));
         }

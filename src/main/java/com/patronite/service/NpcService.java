@@ -18,6 +18,7 @@ public class NpcService {
         {
             this.put("Alastair", new NpcDto("Alastair", "Dewhurst", 17, 6, 10, 17, 6, "Knight", "right", false));
             this.put("Barnaby", new NpcDto("Barnaby", "Dewhurst", 21, 12, 10, 21, 12, "Knight", "up", false));
+            this.put("Digby", new NpcDto("Digby", "Dewhurst", 5, 9, 0, 5, 9, "ItemMerchant", "down", false));
             this.put("Finlay", new NpcDto("Finlay", "Fernsworth", 9, 11, 10, 9, 11, "Knight", "down", false));
             this.put("Nigel", new NpcDto("Nigel", "Easthaven", 7, 17, 10, 7, 17, "Knight", "down", false));
             this.put("Tristan", new NpcDto("Tristan", "Easthaven", 19, 7, 10, 19, 7, "Knight", "down", false));

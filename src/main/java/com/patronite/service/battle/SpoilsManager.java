@@ -49,7 +49,8 @@ public class SpoilsManager {
 //            player.addItems(items);
             battle.addLogEntry(String.format("%s receives %s experience, %s gold, and %s.",
                     player.getPlayerName(), experience.get(), gold.get(),
-                    items.stream().map(ItemDto::getName).collect(Collectors.joining(","))));
+                    items.stream().map(item -> item.getItemDetails().getName())
+                            .collect(Collectors.joining(","))));
         }
     }
 
@@ -69,7 +70,8 @@ public class SpoilsManager {
             ItemDto item = items.get(i);
             //TODO AP add items
 //            player.addItem(item);
-            battle.addLogEntry(String.format("%s receives %s since %s is dead.", player.getPlayerName(), item.getName(), playerName));
+            battle.addLogEntry(String.format("%s receives %s since %s is dead.",
+                    player.getPlayerName(), item.getItemDetails().getName(), playerName));
         }
         battle.addLogEntry(String.format("%s's %s gold was distributed to the party.", playerName, gold));
     }

@@ -1,35 +1,36 @@
 package com.patronite.service.dto.item;
 
+import com.patronite.service.model.ItemDetails;
+
 import java.io.Serializable;
 
 public class ItemDto implements Serializable {
-    private static final long serialVersionUID = -3351348523503637031L;
-    private String name;
-    private int goldValue;
+    private static final long serialVersionUID = 2917860108349724536L;
+    private int id = 0;
+    private ItemDetails itemDetails;
+    private boolean equipped;
 
-    public String getName() {
-        return name;
+    public int getId() {
+        return id;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public int getGoldValue() {
-        return goldValue;
+    public ItemDetails getItemDetails() {
+        return itemDetails;
     }
 
-    public void setGoldValue(int goldValue) {
-        this.goldValue = goldValue;
+    public void setItemDetails(ItemDetails itemDetails) {
+        this.itemDetails = itemDetails;
     }
 
-    public ItemType getItemType() {
-        return itemType;
+    public boolean isEquipped() {
+        return equipped;
     }
 
-    public void setItemType(ItemType itemType) {
-        this.itemType = itemType;
+    public void setEquipped(boolean equipped) {
+        this.equipped = equipped;
     }
-
-    private ItemType itemType;
 }
