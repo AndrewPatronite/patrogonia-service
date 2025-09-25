@@ -1,9 +1,8 @@
 package com.patronite.service.model;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
-
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "save")
@@ -23,6 +22,8 @@ public class Save {
     @Column private String mapName;
     @Column private int rowIndex;
     @Column private int columnIndex;
+    @OneToMany(mappedBy = "save", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<Item> inventory = new ArrayList<>();
 
     public int getPlayerId() {
         return playerId;
@@ -134,5 +135,13 @@ public class Save {
 
     public void setColumnIndex(int columnIndex) {
         this.columnIndex = columnIndex;
+    }
+
+    public List<Item> getInventory() {
+        return inventory;
+    }
+
+    public void setInventory(List<Item> inventory) {
+        this.inventory = inventory;
     }
 }

@@ -1,5 +1,6 @@
 package com.patronite.service.dto.player;
 
+import com.patronite.service.dto.item.ItemDto;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
@@ -9,7 +10,7 @@ import java.util.Set;
 import static com.google.common.collect.Lists.newArrayList;
 
 public class PlayerDto implements Serializable {
-    private static final long serialVersionUID = 6260902686411060208L;
+    private static final long serialVersionUID = 7264181887268601842L;
     private int id;
     private String name;
     private String username;
@@ -21,6 +22,7 @@ public class PlayerDto implements Serializable {
     private Date lastUpdate = new Date();
     private Set<String> visited = new HashSet<>();
     private Set<String> tutorialLessons = new HashSet<>();
+    private List<ItemDto> inventory = newArrayList();
 
     public int getId() {
         return id;
@@ -110,6 +112,14 @@ public class PlayerDto implements Serializable {
         this.tutorialLessons = tutorialLessons;
     }
 
+    public List<ItemDto> getInventory() {
+        return inventory;
+    }
+
+    public void setInventory(List<ItemDto> inventory) {
+        this.inventory = inventory;
+    }
+
     @Override
     public String toString() {
         return "PlayerDto{" +
@@ -123,6 +133,7 @@ public class PlayerDto implements Serializable {
                 ", lastUpdate=" + lastUpdate +
                 ", visited=" + visited +
                 ", tutorialLessons=" + tutorialLessons +
+                ", inventory=" + inventory +
                 '}';
     }
 }

@@ -29,6 +29,9 @@ public class WebConfig extends WebMvcAutoConfiguration implements WebMvcConfigur
         registry.addMapping("/npc/**")
                 .allowedOrigins(allowedOrigins)
                 .allowedMethods("GET", "PUT");
+        registry.addMapping("/item/**")
+                .allowedOrigins(allowedOrigins)
+                .allowedMethods("GET", "PUT");
     }
 
     @Override

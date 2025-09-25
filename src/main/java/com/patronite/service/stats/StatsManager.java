@@ -18,7 +18,7 @@ public class StatsManager {
 
     public void updateStats(int playerId, StatsDto statsDto) {
         Stats stats = statsRepository.getOne(playerId);
-        PlayerAssembler.updateStats(stats, statsDto);
+        PlayerAssembler.updateStats(stats, statsDto, false);
         statsRepository.save(stats);
     }
 }
