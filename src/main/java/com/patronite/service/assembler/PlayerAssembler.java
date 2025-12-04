@@ -230,20 +230,22 @@ public class PlayerAssembler {
                 .collect(Collectors.toMap(Item::getSaveOfItemId, item -> item));
         List<Item> newItemsToSave = new ArrayList<>();
         Set<Integer> updatedItemIds = new HashSet<>();
-        player.getInventory().forEach(item -> {
-            updatedItemIds.add(item.getId());
-            Item previouslySavedItem = previouslySavedItems.get(item.getId());
-            if (previouslySavedItem != null) {
-                previouslySavedItem.setEquipped(item.isEquipped());
-            } else {
-                Item newlySavedItem = new Item();
-                newlySavedItem.setSave(save);
-                newlySavedItem.setItemDetails(item.getItemDetails());
-                newlySavedItem.setEquipped(item.isEquipped());
-                newlySavedItem.setSaveOfItemId(item.getId());
-                newItemsToSave.add(newlySavedItem);
-            }
-        });
+        if (player.getInventory() != null) {
+            player.getInventory().forEach(item -> {
+                updatedItemIds.add(item.getId());
+                Item previouslySavedItem = previouslySavedItems.get(item.getId());
+                if (previouslySavedItem != null) {
+                    previouslySavedItem.setEquipped(item.isEquipped());
+                } else {
+                    Item newlySavedItem = new Item();
+                    newlySavedItem.setSave(save);
+                    newlySavedItem.setItemDetails(item.getItemDetails());
+                    newlySavedItem.setEquipped(item.isEquipped());
+                    newlySavedItem.setSaveOfItemId(item.getId());
+                    newItemsToSave.add(newlySavedItem);
+                }
+            });
+        }
         List<Item> itemsToRemove = previouslySavedItems.values().stream()
                 .filter(item -> !updatedItemIds.contains(item.getSaveOfItemId())).collect(Collectors.toList());
         save.getInventory().removeAll(itemsToRemove);
